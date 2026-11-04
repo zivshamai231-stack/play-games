@@ -8,6 +8,7 @@
     "noEmit": true,
     "skipLibCheck": true,
     "isolatedModules": true,
+    "paths": { "@event-content": ["./src/content/birthday-demo.ts"] },
     "types": ["./worker-configuration.d.ts"]
   },
   "include": ["src/worker", "src/shared", "src/content", "worker-configuration.d.ts"]

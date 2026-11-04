@@ -162,6 +162,7 @@ const content: EventContent = {
     wheelHub: null,
     face: null,
     starGallery: [],
+    gallery: null,
     archiveCaption: "📸 מהארכיון של תומר",
   },
   settings: {

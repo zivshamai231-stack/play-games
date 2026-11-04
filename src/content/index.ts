@@ -1,9 +1,6 @@
 import type { EventContent } from "./types";
-import itay from "./itay";
-import birthday from "./birthday-demo";
+// "@event-content" points at src/content/<EVENT>.ts (vite.config.ts), so a build carries one party's content and nothing else
+import content from "@event-content";
 
-/* Which party this build runs. Pick with EVENT=<id> when building or running dev; the default is the birthday demo. */
-const EVENTS: Record<string, EventContent> = { [itay.id]: itay, [birthday.id]: birthday };
-
-export const EVENT: EventContent = EVENTS[__EVENT__] ?? birthday;
+export const EVENT: EventContent = content;
 export type * from "./types";

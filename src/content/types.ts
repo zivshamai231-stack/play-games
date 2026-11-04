@@ -132,7 +132,9 @@ export interface Media {
   face: string | null;
   /** extra pictures of the star for the idle slideshow and the betting pop-ups, with captions */
   starGallery: [src: string, caption: string][];
-  /** caption for photos from /photos/gallery.json */
+  /** a JSON list of old photos of the star (the lobby certificate, the idle slideshow); null = none */
+  gallery: string | null;
+  /** caption for those photos */
   archiveCaption: string;
 }
 

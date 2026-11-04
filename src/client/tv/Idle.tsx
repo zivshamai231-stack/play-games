@@ -75,7 +75,8 @@ export function IdleShow({ view, game }: { view: ClientView; game: Game }) {
 function Slideshow({ view }: { view: ClientView }) {
   const [gallery, setGallery] = useState<string[]>([]);
   useEffect(() => {
-    fetch("/photos/gallery.json")
+    if (!MEDIA.gallery) return;
+    fetch(MEDIA.gallery)
       .then((res) => (res.ok ? res.json() : []))
       .then((list: unknown) => setGallery(Array.isArray(list) ? list.filter((x): x is string => typeof x === "string") : []))
       .catch(() => setGallery([]));

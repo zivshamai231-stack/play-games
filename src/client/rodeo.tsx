@@ -152,7 +152,13 @@ export function RodeoItay({ size = 260, className }: { size?: number; className?
             <rect x="157" y="126" width="16" height="20" rx="6" fill="#d9a07a" />
             <g className="rd-head">
               <ellipse cx="165" cy="84" rx="52.5" ry="60.5" fill="#f3e3c3" />
-              {STAR_FACE && <image href={STAR_FACE} x="104" y="26" width="122" height="122" clipPath="url(#rd-face)" />}
+              {STAR_FACE ? (
+                <image href={STAR_FACE} x="104" y="26" width="122" height="122" clipPath="url(#rd-face)" />
+              ) : (
+                <text x="165" y="104" textAnchor="middle" fontSize="64">
+                  🥳
+                </text>
+              )}
             </g>
             {/* yee-haw: the other arm waves a cowboy hat (drawn over the head) */}
             <g className="rd-wave">

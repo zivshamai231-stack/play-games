@@ -248,10 +248,12 @@ function ConfirmBanner({ item, view, game }: { item: MeView["toConfirm"][number]
   return (
     <div className="confirm-ask" role="alertdialog" aria-label="משימה סודית עליך">
       <p className="confirm-q">
-        🙋 <b>{by?.name ?? "מישהו"}</b> טוען שעבד עליך:
+        🙋 <b>{by?.name ?? "מישהו"}</b> טוען שביצע עליך משימה סודית. המשימה שלו:
       </p>
       <p className="confirm-text">״{item.text}״</p>
-      <p className="confirm-sub">זה באמת קרה? לא עונים תוך דקה וחצי, וזה נחשב כן.</p>
+      <p className="confirm-sub">
+        זה באמת קרה? לא עונים תוך {view.pub.settings.confirmWindow < 120 ? `${view.pub.settings.confirmWindow} שניות` : `${Math.round(view.pub.settings.confirmWindow / 60)} דקות`}, וזה נחשב כן.
+      </p>
       <div className="confirm-btns">
         <button type="button" className="btn btn-gold" disabled={busy} onClick={() => void answer(true)}>
           כן, עבד עליי 😅

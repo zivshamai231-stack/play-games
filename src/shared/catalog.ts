@@ -26,4 +26,4 @@ export const CIRCLES = EVENT.circles;
 
 /** The star's id in the seeded list, and the picture of his face for drawings. */
 export const STAR_ID = EVENT.players.find((p) => p[3])?.[0] ?? null;
-export const STAR_FACE = EVENT.media.face ?? (STAR_ID ? `/photos/${STAR_ID}.jpg` : null);
+export const STAR_FACE = EVENT.media.face;

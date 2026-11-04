@@ -273,6 +273,7 @@ const content: EventContent = {
       ["/photos/ai/itay/grill.jpg", "שף איתי. השרוף זה בכוונה"],
       ["/photos/ai/itay/titanic.jpg", "מלך העולם, וואלה"],
     ],
+    gallery: "/photos/gallery.json",
     archiveCaption: "📸 מהארכיון של איתי",
   },
   settings: {
