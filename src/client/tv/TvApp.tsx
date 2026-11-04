@@ -1,0 +1,477 @@
+import { AnimatePresence, motion } from "motion/react";
+import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { ClientView, FeedEvent, PlayerPub, TvMode, WheelSpin } from "../../shared/types";
+import { cls, keepAwake } from "../lib";
+import { RodeoPhoto, useIntro } from "../rodeo";
+import { type Game, useGame, useServerNow } from "../net";
+import { prefetchLine, setMuted, sfx, silence, speak, unlockAudio } from "../sound";
+import { Avatar, Marquee, Ticker, burst } from "../ui";
+import { CatchClock, ChatLog, FxLayer, MusicDirector, MysterySpot, ShoutsLayer, SoundFx } from "./Live";
+import { IdleShow } from "./Idle";
+import { BettingVibes, BigWheel, Spinner, Spotlight, holdTv, spinLength, tvBusy } from "./Moments";
+import { AwardsScreen, BoardScreen, Lobby, NightScreen, PhotoScreen, QuizScreen, RevealScreen, RoundScreen, RulesScreen, VoteScreen, WinnerScreen } from "./Screens";
+
+// the host screen embeds a silent copy of the TV as a preview
+const PREVIEW = new URLSearchParams(location.search).has("preview");
+if (PREVIEW) silence();
+
+function effectiveMode(view: ClientView): TvMode {
+  const m = view.pub.tv.mode;
+  if (m === "round" && !view.pub.round) return "board";
+  return m;
+}
+
+/** A fixed 1920×1080 stage scaled to whatever screen the TV is. */
+function Stage({ children }: { children: ReactNode }) {
+  const [scale, setScale] = useState(1);
+  useLayoutEffect(() => {
+    const fit = () => setScale(Math.min(window.innerWidth / 1920, window.innerHeight / 1080));
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
+  return (
+    <div className="tv-viewport">
+      <div className="tv-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export function TvApp() {
+  const { game, view, status } = useGame("tv");
+  const intro = useIntro(PREVIEW ? 0 : 3200);
+  const [armed, setArmed] = useState(PREVIEW);
+  useTvSounds(view);
+
+  // sound only: full screen has its own button (and the F key), so there is always a way back out
+  const arm = () => {
+    // a mute saved by another page on this browser (/admin, /) must not silence the TV
+    setMuted(false);
+    unlockAudio();
+    sfx.join();
+    void keepAwake();
+    setArmed(true);
+  };
+
+  if (!view || (intro && !PREVIEW))
+    return (
+      <Stage>
+        <div className="tv-frame tv-center">
+          <div className="tv-intro">
+            <Marquee size="m" lights />
+            <RodeoPhoto size={640} />
+          </div>
+        </div>
+      </Stage>
+    );
+
+  const mode = effectiveMode(view);
+  const sceneKey = mode === "round" ? `round:${view.pub.round?.id}` : mode;
+  // the room's log sits on the side of the screens that have room for it
+  const chat = mode === "lobby" || mode === "round";
+  return (
+    <>
+      <Stage>
+        <div className={cls("tv-frame", chat && "has-chat")}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={sceneKey}
+              className="tv-scene"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              {mode === "lobby" && <Lobby view={view} />}
+              {mode === "round" &&
+                (view.pub.round?.kind === "quiz" ? (
+                  <QuizScreen view={view} game={game} />
+                ) : view.pub.round?.kind === "vote" ? (
+                  <VoteScreen view={view} game={game} />
+                ) : view.pub.round?.kind === "photo" ? (
+                  <PhotoScreen view={view} game={game} />
+                ) : (
+                  <RoundScreen view={view} game={game} />
+                ))}
+              {mode === "board" && <BoardScreen view={view} />}
+              {mode === "night" && <NightScreen view={view} />}
+              {mode === "missions" && <RevealScreen view={view} />}
+              {mode === "awards" && <AwardsScreen view={view} />}
+              {mode === "winner" && <WinnerScreen view={view} />}
+              {mode === "rules" && <RulesScreen view={view} />}
+            </motion.div>
+          </AnimatePresence>
+          <Ticker players={view.pub.players} start={view.pub.settings.startBalance} />
+          <RoundExtras view={view} game={game} avoidLeft={chat} />
+          {chat && <ChatLog view={view} game={game} />}
+          <ShoutsLayer shouts={view.pub.shouts} players={view.pub.players} feed={view.pub.feed} bubbles={!chat} />
+          {!PREVIEW && <IdleShow view={view} game={game} />}
+          <FxLayer game={game} />
+          <SoundFx game={game} />
+          <CatchClock feed={view.pub.feed} game={game} compact={!chat} />
+          <MusicDirector view={view} game={game} armed={armed} />
+          <NewsBanner feed={view.pub.feed} players={view.pub.players} skipShots={mode === "round"} offset={game.offset} />
+          <WheelOverlay wheel={view.pub.wheel} players={view.pub.players} offset={game.offset} feed={view.pub.feed} />
+          <span className={cls("tv-conn", status)} aria-hidden="true" />
+        </div>
+      </Stage>
+      {!armed && (
+        <button type="button" className="tv-arm" onClick={arm}>
+          🔊 לחצו כאן להפעלת סאונד
+        </button>
+      )}
+      {!PREVIEW && <FullscreenToggle />}
+    </>
+  );
+}
+
+type FsDoc = Document & { webkitFullscreenElement?: Element | null; webkitExitFullscreen?: () => Promise<void> | void };
+type FsEl = HTMLElement & { webkitRequestFullscreen?: () => Promise<void> | void };
+const inFullscreen = () => !!(document.fullscreenElement || (document as FsDoc).webkitFullscreenElement);
+
+async function toggleFullscreen() {
+  const d = document as FsDoc;
+  const el = document.documentElement as FsEl;
+  try {
+    if (inFullscreen()) await (d.exitFullscreen ? d.exitFullscreen() : d.webkitExitFullscreen?.());
+    else await (el.requestFullscreen ? el.requestFullscreen() : el.webkitRequestFullscreen?.());
+  } catch {
+    /* not allowed right now */
+  }
+}
+
+/** Full screen in and out: a button that shows up when the mouse moves, and the F key (כ on a Hebrew keyboard). */
+function FullscreenToggle() {
+  const [on, setOn] = useState(inFullscreen);
+  const [shown, setShown] = useState(true);
+  useEffect(() => {
+    const sync = () => setOn(inFullscreen());
+    let hide = window.setTimeout(() => setShown(false), 6000);
+    const wake = () => {
+      setShown(true);
+      window.clearTimeout(hide);
+      hide = window.setTimeout(() => setShown(false), 3000);
+    };
+    const key = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      if (e.key === "f" || e.key === "F" || e.key === "כ") void toggleFullscreen();
+    };
+    document.addEventListener("fullscreenchange", sync);
+    document.addEventListener("webkitfullscreenchange", sync);
+    window.addEventListener("mousemove", wake);
+    window.addEventListener("keydown", key);
+    return () => {
+      window.clearTimeout(hide);
+      document.removeEventListener("fullscreenchange", sync);
+      document.removeEventListener("webkitfullscreenchange", sync);
+      window.removeEventListener("mousemove", wake);
+      window.removeEventListener("keydown", key);
+    };
+  }, []);
+  return (
+    <button type="button" className={cls("tv-fs", shown && "shown")} onClick={() => void toggleFullscreen()}>
+      {on ? "✕ יציאה ממסך מלא (F)" : "⛶ מסך מלא (F)"}
+    </button>
+  );
+}
+
+/** Sounds that belong to the room, not to one phone: joins, bets landing, the gavel. */
+function useTvSounds(view: ClientView | null) {
+  const prev = useRef<{ claimed: number; roundKey: string | null; status: string | null; bettors: number } | null>(null);
+  useEffect(() => {
+    if (!view) return;
+    const r = view.pub.round;
+    const cur = {
+      claimed: view.pub.players.filter((p) => p.claimed).length,
+      roundKey: r ? `${r.id}:${r.openedAt}` : null,
+      status: r?.status ?? null,
+      bettors: r?.bettors.length ?? 0,
+    };
+    const p = prev.current;
+    prev.current = cur;
+    if (!p) return;
+    if (cur.claimed > p.claimed) sfx.join();
+    if (r && cur.status === "open" && (cur.roundKey !== p.roundKey || p.status !== "open")) sfx.open();
+    else if (r && cur.roundKey === p.roundKey && cur.status === "open" && cur.bettors > p.bettors) sfx.chip();
+    if (r && cur.roundKey === p.roundKey && p.status === "open" && cur.status === "closed") sfx.close();
+  }, [view]);
+}
+
+/** While a round is live: the draw reel when it was picked at random, then music and Itay popping up until bets close. */
+function RoundExtras({ view, game, avoidLeft }: { view: ClientView; game: Game; avoidLeft: boolean }) {
+  const r = view.pub.round;
+  const draw = view.pub.draw;
+  const live = !!r && r.status === "open";
+  const spinning = !!draw && Date.now() + game.offset < draw.at + spinLength(draw);
+  const now = useServerNow(game, live || spinning, 500);
+  const drawing = !!draw && now < draw.at + spinLength(draw);
+  const betting = live && !drawing && view.pub.tv.mode === "round" && (r!.closesAt === null || now < r!.closesAt);
+  return (
+    <>
+      <BettingVibes active={betting && r!.kind !== "vote" && r!.kind !== "photo"} avoidLeft={avoidLeft} />
+      <AnimatePresence>{drawing && draw && <BigWheel key={draw.at} draw={draw} players={view.pub.players} feed={view.pub.feed} />}</AnimatePresence>
+    </>
+  );
+}
+
+const NEWS_TAG: Record<string, string> = {
+  mission: "מבזק",
+  reveal: "נחשף",
+  caught: "נתפס!",
+  miss: "פספוס",
+  bailout: "חילוץ",
+  result: "הוכרע",
+  shot: "שוט!",
+  broke: "פשט רגל",
+  gift: "מתנה",
+  king: "מלך חדש",
+  streak: "רצף",
+  card: "קלף זהב",
+};
+const BIG = new Set(["mission", "reveal", "broke", "king", "streak", "card"]);
+
+/** How a big moment from the feed looks on the whole screen. */
+function spotFor(e: FeedEvent, people: PlayerPub[]): Parameters<typeof Spotlight>[0] {
+  const one = people.slice(0, 1);
+  const line = e.data?.line ?? e.text;
+  switch (e.kind) {
+    case "broke":
+      return { kind: "broke", title: "💸 פשט רגל!", people: one, line, sub: "אחרי שהוא מבצע, המנחה מאשר לו חילוץ מהבנק", task: e.data?.task, amount: e.data?.amount };
+    case "king":
+      return { kind: "win", title: "👑 יש מלך חדש!", people: one, line };
+    case "streak":
+      return { kind: "fast", title: `🔥 ${e.data?.streak ?? 3} ברצף!`, people: one, line, amount: e.data?.amount };
+    case "card":
+      if (e.data?.card === "drink") return { kind: "shot", title: "🃏 קלף זהב: אתה שותה!", people: one, line, task: "לשתות שוט 🥃" };
+      if (e.data?.card === "veto") return { kind: "mission", title: "🛑 וטו של החתן!", people: one, line };
+      return { kind: "win", title: "💥 החתן הכפיל!", people: one, line };
+    default:
+      return { kind: "mission", title: "🕵️ נחשף!", people: one, line, sub: "אף אחד לא תפס אותו. עדיין אפשר לנחש מה הוא עשה ולגנוב לו את השקדים 🕵️", amount: e.data?.amount };
+  }
+}
+
+/** Breaking news: a strip for small things, the whole screen for a finished mission or someone going broke. */
+function NewsBanner({ feed, players, skipShots, offset }: { feed: FeedEvent[]; players: PlayerPub[]; skipShots: boolean; offset: number }) {
+  const [queue, setQueue] = useState<FeedEvent[]>([]);
+  const seen = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (!seen.current) {
+      seen.current = new Set(feed.map((e) => e.id));
+      return;
+    }
+    // the wheel and the quiz screen show their own big moments
+    // gifts have their own lane (the bubbles); big moments jump ahead of the small news
+    const fresh = feed.filter((e) => !seen.current!.has(e.id) && e.kind !== "wheel" && e.kind !== "gift" && e.kind !== "spin" && !(skipShots && e.kind === "shot"));
+    for (const e of feed) seen.current.add(e.id);
+    if (fresh.length)
+      setQueue((q) => {
+        const [now, ...rest] = q;
+        const all = [...rest, ...fresh];
+        const big = all.filter((e) => BIG.has(e.kind));
+        return [...(now ? [now] : []), ...big, ...all.filter((e) => !BIG.has(e.kind))];
+      });
+  }, [feed]);
+
+  // wait while a round's own moments are playing, then show it and read it out
+  const next = queue[0];
+  const [ready, setReady] = useState<string | null>(null);
+  useEffect(() => {
+    if (!next) return;
+    prefetchLine(`feed:${next.id}`);
+    // something else (the drinking wheel) may take the screen while this waits: check again before showing
+    let t = 0;
+    const when = () => {
+      const wait = tvBusy.until - Date.now();
+      if (wait > 0) t = window.setTimeout(when, wait + 50);
+      else setReady(next.id);
+    };
+    when();
+    return () => window.clearTimeout(t);
+  }, [next?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  const current = next && ready === next.id ? next : undefined;
+
+  useEffect(() => {
+    if (!current) return;
+    const big = BIG.has(current.kind);
+    if (current.kind === "mission") {
+      sfx.siren();
+      sfx.boom();
+    } else if (current.kind === "reveal") {
+      sfx.fanfare();
+      burst("win");
+    } else if (current.kind === "broke") sfx.sad();
+    else if (current.kind === "king") {
+      sfx.fanfare();
+      burst("win");
+    } else if (current.kind === "streak") {
+      sfx.whoosh();
+      sfx.win();
+    } else if (current.kind === "card") {
+      if (current.data?.card === "veto") {
+        sfx.siren();
+        sfx.boom();
+      } else if (current.data?.card === "drink") sfx.gotcha();
+      else sfx.fanfare();
+      burst("big");
+    }
+    else if (current.kind === "caught") sfx.gotcha();
+    else if (current.kind === "miss") sfx.lose();
+    else sfx.coin();
+    speak(`feed:${current.id}`);
+    const ms = current.kind === "broke" ? 10_000 : big ? 8500 : 7500;
+    if (big) holdTv(ms);
+    const id = window.setTimeout(() => setQueue((q) => q.slice(1)), ms);
+    return () => window.clearTimeout(id);
+  }, [current?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const people = current ? current.players.map((id) => players.find((p) => p.id === id)).filter((p): p is PlayerPub => !!p) : [];
+  if (current?.kind === "mission")
+    return (
+      <AnimatePresence>
+        <MysterySpot key={current.id} line={current.data?.line ?? current.text} until={current.data?.until} offset={offset} />
+      </AnimatePresence>
+    );
+  if (current && BIG.has(current.kind) && people.length)
+    return (
+      <AnimatePresence>
+        <Spotlight key={current.id} {...spotFor(current, people)} />
+      </AnimatePresence>
+    );
+  return (
+    <AnimatePresence>
+      {current && (
+        <motion.div
+          key={current.id}
+          className={cls("news", current.kind)}
+          initial={{ y: -160 }}
+          animate={{ y: 0 }}
+          exit={{ y: -160 }}
+          transition={{ type: "spring", stiffness: 220, damping: 24 }}
+        >
+          <span className="news-tag">{NEWS_TAG[current.kind] ?? "עדכון"}</span>
+          <span className="news-text">{current.text}</span>
+          {people.length > 0 && people.length <= 4 && (
+            <span className="news-faces">
+              {people.map((p) => (
+                <Avatar key={p.id} p={p} size={72} />
+              ))}
+            </span>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+const WHEEL_COLORS = [
+  ["#E9B949", "#1C1206"],
+  ["#11523C", "#F3E3C3"],
+  ["#8E1B22", "#F3E3C3"],
+  ["#F3E3C3", "#1C1206"],
+];
+
+function arc(a0: number, a1: number, r: number) {
+  const p = (a: number) => `${(Math.sin((a * Math.PI) / 180) * r).toFixed(2)} ${(-Math.cos((a * Math.PI) / 180) * r).toFixed(2)}`;
+  return `M 0 0 L ${p(a0)} A ${r} ${r} 0 0 1 ${p(a1)} Z`;
+}
+
+const short = (label: string) => {
+  const words = label.split(" ");
+  return words.length > 4 ? `${words.slice(0, 4).join(" ")}…` : label;
+};
+
+/** The drinking / punishment wheel: spins on every new spin the host triggers, then shows who it landed on. */
+function WheelOverlay({ wheel, players, offset, feed }: { wheel: WheelSpin | null; players: PlayerPub[]; offset: number; feed: FeedEvent[] }) {
+  const [phase, setPhase] = useState<"spin" | "done" | null>(null);
+  const shown = useRef<string | null>(wheel?.id ?? null);
+
+  useEffect(() => {
+    if (!wheel || wheel.id === shown.current) return;
+    shown.current = wheel.id;
+    if (Date.now() + offset - wheel.at > 40_000) return;
+    // don't cover a result that is still playing: start when the screen is free
+    const wait = Math.max(0, tvBusy.until - Date.now());
+    holdTv(wait + 16_000);
+    const timers: number[] = [];
+    timers.push(window.setTimeout(() => setPhase("spin"), wait));
+    let t = 0;
+    let gap = 55;
+    while (t < 5200) {
+      timers.push(window.setTimeout(() => sfx.wheelTick(), wait + t));
+      gap *= 1.07;
+      t += gap;
+    }
+    const said = feed.find((e) => e.kind === "wheel" && e.ref === wheel.id);
+    if (said) prefetchLine(`feed:${said.id}`);
+    timers.push(
+      window.setTimeout(() => {
+        setPhase("done");
+        sfx.ding();
+        burst("win");
+        if (said) speak(`feed:${said.id}`);
+      }, wait + 5400),
+    );
+    timers.push(window.setTimeout(() => setPhase(null), wait + 16_000));
+    return () => timers.forEach((x) => window.clearTimeout(x));
+  }, [wheel?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!phase || !wheel) return null;
+  const n = wheel.segments.length;
+  const seg = 360 / n;
+  const target = 360 * 6 - (wheel.index * seg + seg / 2);
+  const who = wheel.players.map((id) => players.find((p) => p.id === id)).filter((p): p is PlayerPub => !!p);
+
+  return (
+    <motion.div key={wheel.id} className="wheel-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <div className="wheel-title">{wheel.kind === "punish" ? "🍋 גלגל העונשים" : "🎡 גלגל השתייה"}</div>
+      <div className="wheel-wrap">
+        <div className="wheel-shadow" aria-hidden="true" />
+        <Spinner className="wheel-spin" target={target} ms={5200} ease="cubic-bezier(0.1, 0.75, 0.15, 1)">
+        <svg className="wheel" viewBox="-104 -104 208 208">
+          <circle r="103" fill="#4A2A12" stroke="#C9922F" strokeWidth="3" />
+          {wheel.segments.map((label, i) => {
+            const [bg, fg] = WHEEL_COLORS[i % WHEEL_COLORS.length];
+            const mid = i * seg + seg / 2;
+            const rest = (((mid + target) % 360) + 360) % 360;
+            const turn = rest > 0 && rest < 180 ? 270 : 90;
+            return (
+              <g key={i}>
+                <path d={arc(i * seg, (i + 1) * seg, 98)} fill={bg} stroke="#4A2A12" strokeWidth="0.8" />
+                <g transform={`rotate(${mid})`}>
+                  <text x="0" y="-56" transform={`rotate(${turn} 0 -56)`} fill={fg} fontSize={n > 8 ? 6.2 : 7.2} fontWeight="800" textAnchor="middle" dominantBaseline="middle" fontFamily="Rubik, sans-serif">
+                    {short(label)}
+                  </text>
+                </g>
+              </g>
+            );
+          })}
+          <circle r="14" fill="#E9B949" stroke="#4A2A12" strokeWidth="2" />
+          <text y="1" fontSize="13" textAnchor="middle" dominantBaseline="middle">
+            🥜
+          </text>
+        </svg>
+        </Spinner>
+        <div className="wheel-pointer" aria-hidden="true" />
+      </div>
+      <AnimatePresence>
+        {phase === "done" && (
+          <motion.div className="wheel-result" initial={{ y: 60, opacity: 0, scale: 0.9 }} animate={{ y: 0, opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 16 }}>
+            <div className="wheel-label">{wheel.label}</div>
+            {who.length > 0 && who.length < players.length && (
+              <div className="wheel-who">
+                {who.map((p) => (
+                  <span key={p.id} className="wheel-person">
+                    <Avatar p={p} size={110} />
+                    <b>{p.name}</b>
+                  </span>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}

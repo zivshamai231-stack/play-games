@@ -1,0 +1,464 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ClientView, PlayerPub, TvMode } from "../../shared/types";
+import { RULES, SOUNDS } from "../../shared/catalog";
+import { awardSteps } from "../awards";
+import { cls, fmt, useMedia } from "../lib";
+import { creds, type Game, useGame } from "../net";
+import { QR } from "../qr";
+import { sfx } from "../sound";
+import { Avatar, ConnBanner, Marquee, Money, MuteButton, Sheet, ask, toast } from "../ui";
+import { MissionsTab } from "./Missions";
+import { PlayersTab } from "./Players";
+import { RoundsTab } from "./Rounds";
+import { RodeoPhoto } from "../rodeo";
+
+// /admin#key=123456 logs the host in once and keeps the code on this device
+{
+  const m = location.hash.match(/key=([^&]+)/);
+  if (m) {
+    creds.key = decodeURIComponent(m[1]);
+    history.replaceState(null, "", location.pathname);
+  }
+}
+
+export type Run = (a: string, p?: Record<string, unknown>, ok?: string) => Promise<unknown>;
+
+export function useRun(game: Game): Run {
+  return useCallback(
+    async (a, p = {}, ok) => {
+      try {
+        const r = await game.act(a, p);
+        if (ok) toast(ok, "ok");
+        return r ?? true;
+      } catch (e) {
+        toast((e as Error).message, "err", 5000);
+        return undefined;
+      }
+    },
+    [game],
+  );
+}
+
+type Tab = "rounds" | "missions" | "players" | "tv";
+
+export function AdminApp() {
+  const { game, view, status } = useGame("admin");
+  const [tab, setTab] = useState<Tab>("rounds");
+  const run = useRun(game);
+  const wide = useMedia("(min-width: 1100px)");
+  useInboxAlerts(view);
+
+  if (!view)
+    return (
+      <div className="splash">
+        <Marquee size="m" />
+        <RodeoPhoto size={240} />
+      </div>
+    );
+  if (!view.admin) return <AdminLogin game={game} />;
+
+  const online = view.pub.players.filter((p) => p.online).length;
+  const tabs: [Tab, string][] = [
+    ["rounds", "🎲 סיבובים"],
+    ["missions", "🤫 משימות"],
+    ["players", "👥 שחקנים"],
+    ["tv", "📺 מסך"],
+  ];
+
+  return (
+    <div className={cls("admin", wide && "wide")}>
+      <ConnBanner status={status} />
+      <div className="admin-head">
+        <header className="admin-top">
+          <Marquee size="s" />
+          <div className="admin-top-info">
+            <b>מסך מנחה</b>
+            <span>
+              {online} מתוך {view.pub.players.length} מחוברים
+            </span>
+          </div>
+          <button type="button" className="icon-btn play-link" onClick={() => location.assign("/")} aria-label="המשחק שלי" title="המשחק שלי">
+            🎮
+          </button>
+          <MuteButton />
+        </header>
+        <nav className="admin-tabs" aria-label="ניהול">
+          {tabs.map(([id, label]) => (
+            <button key={id} type="button" className={cls("admin-tab", tab === id && "on")} onClick={() => setTab(id)} aria-current={tab === id ? "page" : undefined}>
+              {label}
+            </button>
+          ))}
+        </nav>
+        <Inbox view={view} run={run} />
+      </div>
+      <main className="admin-main">
+        {tab === "rounds" && <RoundsTab game={game} view={view} run={run} />}
+        {tab === "missions" && <MissionsTab view={view} run={run} />}
+        {tab === "players" && <PlayersTab game={game} view={view} run={run} />}
+        {tab === "tv" && <TvTab view={view} run={run} wide={wide} />}
+      </main>
+      <SoundBoard run={run} />
+    </div>
+  );
+}
+
+/** The host is the DJ: a button in the corner of every tab, and the TV plays it right away. */
+function SoundBoard({ run }: { run: Run }) {
+  const [open, setOpen] = useState(false);
+  const [last, setLast] = useState<string | null>(null);
+  const fire = async (id: string) => {
+    navigator.vibrate?.(15);
+    setLast(id);
+    await run("sound", { id });
+    window.setTimeout(() => setLast((x) => (x === id ? null : x)), 900);
+  };
+  return (
+    <>
+      <button type="button" className="sb-fab" onClick={() => setOpen(true)} aria-label="לוח סאונדים לטלוויזיה">
+        📯
+      </button>
+      <Sheet open={open} onClose={() => setOpen(false)} title="📯 לוח סאונדים">
+        <p className="muted">כל לחיצה מתנגנת מיד בטלוויזיה, עם הקריין.</p>
+        <div className="sb-grid">
+          {SOUNDS.map((x) => (
+            <button key={x.id} type="button" className={cls("sb-btn", last === x.id && "on")} onClick={() => fire(x.id)}>
+              <span aria-hidden="true">{x.emoji}</span>
+              <b>{x.label}</b>
+            </button>
+          ))}
+        </div>
+      </Sheet>
+    </>
+  );
+}
+
+function useInboxAlerts(view: ClientView | null) {
+  const seen = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (!view?.admin) return;
+    const pending = [...view.admin.accusations.filter((a) => a.status === "pending"), ...view.admin.bailouts.filter((b) => b.status === "pending")];
+    const prev = seen.current;
+    seen.current = new Set(pending.map((x) => x.id));
+    if (!prev) return;
+    if (pending.some((x) => !prev.has(x.id))) {
+      toast("📥 יש בקשה חדשה לטיפול", "info", 5000);
+      sfx.coin();
+      navigator.vibrate?.([40, 40, 40]);
+    }
+  }, [view]);
+}
+
+/** Catches and bailouts waiting for the host's ruling. */
+function Inbox({ view, run }: { view: ClientView; run: Run }) {
+  const [open, setOpen] = useState(false);
+  const admin = view.admin!;
+  const accs = admin.accusations.filter((a) => a.status === "pending");
+  const bails = admin.bailouts.filter((b) => b.status === "pending");
+  const people = Object.fromEntries(view.pub.players.map((p) => [p.id, p])) as Record<string, PlayerPub>;
+  const { falsePenalty, catchReward, bailoutAmount } = view.pub.settings;
+  const n = accs.length + bails.length;
+  if (!n) return null;
+  const parts = [accs.length && (accs.length === 1 ? "האשמה אחת" : `${accs.length} האשמות`), bails.length && (bails.length === 1 ? "בקשת חילוץ" : `${bails.length} בקשות חילוץ`)].filter(Boolean);
+  return (
+    <>
+      <button type="button" className="inbox-bar" onClick={() => setOpen(true)}>
+        <span>📥 לטיפול: {parts.join(" ו")}</span>
+        <b>פתיחה</b>
+      </button>
+      <Sheet open={open} onClose={() => setOpen(false)} title="לטיפול" wide>
+        <div className="stack">
+          {accs.map((a) => {
+            const by = people[a.by];
+            const sus = people[a.suspect];
+            const options = admin.missions.filter((m) => m.assignedTo === a.suspect && m.status !== "burned");
+            return (
+              <div key={a.id} className="inbox-item">
+                <div className="inbox-who">
+                  {by && <Avatar p={by} size={36} />}
+                  <span>
+                    <b>{by?.name}</b> טוען שתפס את <b>{sus?.name}</b>
+                  </span>
+                  {sus && <Avatar p={sus} size={36} />}
+                </div>
+                <blockquote className="inbox-quote">״{a.text}״</blockquote>
+                <p className="muted">
+                  זה מתאים לאחת המשימות של {sus?.name}? אם כן, המשימה נשרפת ו{by?.name} גונב לו את שווי המשימה.
+                </p>
+                <div className="mission-picks">
+                  {options.map((m) => (
+                    <button key={m.id} type="button" className="mission-pick" onClick={() => run("judgeAccusation", { accusationId: a.id, missionId: m.id }, `צדק! ${by?.name} גונב ${Math.max(m.reward, catchReward)}`)}>
+                      <span aria-hidden="true">{m.status === "done" ? "✅" : "✉️"}</span>
+                      <span>{m.text}</span>
+                    </button>
+                  ))}
+                </div>
+                <button type="button" className="btn btn-danger" onClick={() => run("judgeAccusation", { accusationId: a.id }, `האשמת שווא: −${falsePenalty} ל${by?.name}`)}>
+                  ✗ אף אחת. טעה (−{falsePenalty})
+                </button>
+              </div>
+            );
+          })}
+          {bails.map((b) => {
+            const p = people[b.playerId];
+            return (
+              <div key={b.id} className="inbox-item">
+                <div className="inbox-who">
+                  {p && <Avatar p={p} size={36} />}
+                  <span>
+                    {b.dare ? "💸" : "🆘"} <b>{p?.name}</b> {b.dare ? "פשט רגל" : "מבקש חילוץ"}. יתרה: <Money n={p?.balance ?? 0} size={14} />
+                  </span>
+                </div>
+                <p className="muted">
+                  {b.dare ? (
+                    <>
+                      המשימה שלו: <b>{b.dare}</b>. אחרי שביצע, מאשרים והוא מקבל {fmt(bailoutAmount)}.
+                    </>
+                  ) : (
+                    <>באישור הוא מקבל {fmt(bailoutAmount)}, והטלוויזיה מגרילה לו עונש קטן.</>
+                  )}
+                </p>
+                <div className="row-actions">
+                  <button type="button" className="btn btn-gold" onClick={() => run("judgeBailout", { bailoutId: b.id, approve: true }, "החילוץ אושר")}>
+                    {b.dare ? "ביצע. לאשר חילוץ" : "לאשר חילוץ"}
+                  </button>
+                  <button type="button" className="btn btn-ghost" onClick={() => run("judgeBailout", { bailoutId: b.id, approve: false }, "הבקשה נדחתה")}>
+                    לדחות
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Sheet>
+    </>
+  );
+}
+
+function AdminLogin({ game }: { game: Game }) {
+  const [code, setCode] = useState("");
+  const [tried, setTried] = useState(!!creds.key);
+  return (
+    <div className="admin-login">
+      <Marquee size="m" />
+      <h1>כניסת מנחה</h1>
+      {tried && <p className="error-text">הקוד לא נכון. נסו שוב.</p>}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          creds.key = code.trim();
+          setTried(true);
+          game.rehello();
+          void game.refresh();
+        }}
+      >
+        <label className="field">
+          <span>קוד מנחה</span>
+          <input inputMode="numeric" autoComplete="off" value={code} onChange={(e) => setCode(e.target.value)} autoFocus />
+        </label>
+        <button type="submit" className="btn btn-gold" disabled={!code.trim()}>
+          כניסה
+        </button>
+      </form>
+    </div>
+  );
+}
+
+/** What the phones sent to the TV, with who really sent it (also the anonymous ones), and a way to pull it. */
+function ShoutsAdmin({ view, run }: { view: ClientView; run: Run }) {
+  const list = view.admin!.shouts.slice(0, 12);
+  const name = (id: string) => view.pub.players.find((p) => p.id === id)?.name ?? "?";
+  return (
+    <div className="felt shouts-admin">
+      <h3>📣 מה עלה למסך</h3>
+      {!list.length && <p className="muted">עוד אף אחד לא שלח כלום למסך.</p>}
+      {list.map((x) => (
+        <div key={x.id} className={cls("mrow", x.hidden && "burned")}>
+          <span className="mrow-text">
+            <b>{name(x.author)}</b>
+            {x.anon && <small className="muted"> (בעילום שם)</small>}: {x.photo && <img className="shout-thumb" src={x.photo} alt="" />}
+                {x.video && (
+                  <a href={x.video} target="_blank" rel="noreferrer">
+                    🎬 סרטון
+                  </a>
+                )}{" "}
+                {x.text}
+          </span>
+          {!x.hidden && (
+            <button type="button" className="mini" onClick={() => run("hideShout", { shoutId: x.id }, "הוסתר מהמסך")}>
+              הסתרה
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function WheelButtons({ run }: { run: Run }) {
+  return (
+    <div className="row-actions">
+      <button type="button" className="btn btn-gold" onClick={() => run("spinWheel", { kind: "drink" }, "הגלגל מסתובב בטלוויזיה")}>
+        🎡 גלגל השתייה
+      </button>
+      <button
+        type="button"
+        className="btn btn-ghost"
+        onClick={async () => {
+          if (await ask({ title: "גלגל העונשים?", body: "המקום האחרון כרגע מקבל עונש מהגלגל. מתאים לסוף הלילה.", ok: "לסובב" }))
+            await run("spinWheel", { kind: "punish" }, "גלגל העונשים מסתובב");
+        }}
+      >
+        🍋 גלגל העונשים
+      </button>
+    </div>
+  );
+}
+
+function TvTab({ view, run, wide }: { view: ClientView; run: Run; wide: boolean }) {
+  const [peek, setPeek] = useState(false);
+  const modes: [TvMode, string, string][] = [
+    ["lobby", "🎰 מסך פתיחה", "הלוגו, תעודת המניה של איתי וקוד QR להצטרפות"],
+    ["rules", "📖 איך משחקים", `${RULES.length} שקפים עם הקריין, לתחילת הערב. מעבירים מכאן`],
+    ["round", "🎲 הסיבוב הנוכחי", "האתגר או שאלת הידע: השאלה, הקופה והתוצאה"],
+    ["board", "📈 הבורסה", "פודיום, מי המלך ומי השקד המר, וגרף לכל אחד"],
+    ["night", "🌙 הימורי הלילה", "כל הקופות והיחסים של הימורי הלילה"],
+    ["missions", "🤫 חשיפת המשימות", "מציג את המשימות של כולם. לסוף הערב בלבד"],
+    ["awards", "🏆 טקס פרסים", "פרסים מצחיקים, שלושה פודיומים, והשקד המר"],
+    ["winner", "👑 הכרזת המנצח", "רק הפודיום הסופי, עם קונפטי"],
+  ];
+  const origin = location.origin;
+  const setMode = async (m: TvMode) => {
+    if (m === "missions" || m === "awards" || m === "winner") {
+      const ok = await ask({
+        title: m === "missions" ? "לחשוף את כל המשימות?" : m === "awards" ? "להתחיל את טקס הפרסים?" : "להכריז על המנצח?",
+        body: m === "missions" ? "כל המשימות הסודיות של כולם יופיעו בטלוויזיה." : "מתאים לסוף הלילה, אחרי הסיבוב האחרון.",
+        ok: "כן, לטלוויזיה",
+      });
+      if (!ok) return;
+    }
+    await run("setTv", { mode: m });
+  };
+  const copy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast("הועתק", "ok");
+    } catch {
+      toast(text);
+    }
+  };
+  const steps = view.pub.tv.mode === "awards" ? awardSteps(view) : [];
+  const step = Math.min(view.pub.tv.step, Math.max(0, steps.length - 1));
+  const stepName = (i: number) => {
+    const s = steps[i];
+    if (!s) return "";
+    return s.kind === "title" ? "פתיחה" : s.kind === "final" ? "👑 הפודיום הסופי" : s.kind === "punish" ? "🍋 השקד המר" : `${s.emoji} ${s.title}`;
+  };
+
+  return (
+    <section className="tv-tab">
+      <div className="tv-tab-ctl stack">
+      <h2 className="section-title">מה מוצג בטלוויזיה</h2>
+      <div className="tv-modes">
+        {modes.map(([m, label, desc]) => (
+          <button key={m} type="button" className={cls("tv-mode", view.pub.tv.mode === m && "on")} onClick={() => setMode(m)} aria-pressed={view.pub.tv.mode === m}>
+            <b>{label}</b>
+            <span>{desc}</span>
+          </button>
+        ))}
+      </div>
+
+      {view.pub.tv.mode === "rules" && (
+        <div className="awards-ctl felt">
+          <h3>📖 איך משחקים</h3>
+          <p>
+            שקף {Math.min(view.pub.tv.step, RULES.length - 1) + 1} מתוך {RULES.length}: <b>{RULES[Math.min(view.pub.tv.step, RULES.length - 1)].title}</b>
+          </p>
+          <div className="row-actions">
+            <button type="button" className="btn btn-ghost" disabled={view.pub.tv.step === 0} onClick={() => run("tvStep", { delta: -1, max: RULES.length - 1 })}>
+              ◀ הקודם
+            </button>
+            {view.pub.tv.step < RULES.length - 1 ? (
+              <button type="button" className="btn btn-gold" onClick={() => run("tvStep", { delta: 1, max: RULES.length - 1 })}>
+                הבא: {RULES[view.pub.tv.step + 1].title}
+              </button>
+            ) : (
+              <button type="button" className="btn btn-gold" onClick={() => run("setTv", { mode: "lobby" }, "חזרה למסך הפתיחה")}>
+                סיימנו, למסך הפתיחה
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {view.pub.tv.mode === "awards" && (
+        <div className="awards-ctl felt">
+          <h3>🏆 טקס הפרסים</h3>
+          <p>
+            שלב {step + 1} מתוך {steps.length}: <b>{stepName(step)}</b>
+          </p>
+          <div className="row-actions">
+            <button type="button" className="btn btn-ghost" disabled={step === 0} onClick={() => run("tvStep", { delta: -1, max: steps.length - 1 })}>
+              ◀ הקודם
+            </button>
+            <button type="button" className="btn btn-gold" disabled={step >= steps.length - 1} onClick={() => run("tvStep", { delta: 1, max: steps.length - 1 })}>
+              {step + 1 < steps.length ? `הבא: ${stepName(step + 1)}` : "זה הסוף"}
+            </button>
+          </div>
+          {steps[step]?.kind === "punish" && <p className="muted">עכשיו לוחצים על ״גלגל העונשים״ למטה.</p>}
+        </div>
+      )}
+
+      <ShoutsAdmin view={view} run={run} />
+
+      <div className="felt wheels">
+        <h3>הגלגלים</h3>
+        <p className="muted">הגלגל מסתובב על כל מסך שמוצג בטלוויזיה, ומי שנבחר מקבל התראה בטלפון.</p>
+        <WheelButtons run={run} />
+      </div>
+
+      <div className="links felt">
+        <h3>קישורים</h3>
+        <div className="link-row">
+          <span>לשחקנים</span>
+          <code dir="ltr">{origin}</code>
+          <button type="button" className="btn btn-ghost btn-s" onClick={() => copy(origin)}>
+            העתקה
+          </button>
+        </div>
+        <div className="link-row">
+          <span>לטלוויזיה</span>
+          <code dir="ltr">{origin}/tv</code>
+          <a className="btn btn-ghost btn-s" href="/tv" target="_blank" rel="noreferrer">
+            פתיחה
+          </a>
+        </div>
+        <div className="links-qr">
+          <QR url={origin} size={200} />
+        </div>
+      </div>
+      </div>
+
+      <div className="tv-tab-preview">
+        {wide || peek ? (
+          <div className="tv-preview felt">
+            <div className="tv-preview-head">
+              <h3>👁 מה רואים עכשיו בטלוויזיה</h3>
+              {!wide && (
+                <button type="button" className="link-btn" onClick={() => setPeek(false)}>
+                  הסתרה
+                </button>
+              )}
+            </div>
+            <div className="tv-preview-frame">
+              <iframe src="/tv?preview=1" title="תצוגה מקדימה של הטלוויזיה" loading="lazy" />
+            </div>
+          </div>
+        ) : (
+          <button type="button" className="btn btn-ghost" onClick={() => setPeek(true)}>
+            👁 להציג כאן מה רואים בטלוויזיה
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
