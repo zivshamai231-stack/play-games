@@ -50,8 +50,12 @@ jobs:
           cache: npm
       - if: env.CLOUDFLARE_API_TOKEN != ''
         run: npm ci
-      - name: Keep the host code out of the logs
-        if: env.CLOUDFLARE_API_TOKEN != '' && inputs.admin_key != ''
-        run: echo "::add-mask::${{ inputs.admin_key }}"
-      - if: env.CLOUDFLARE_API_TOKEN != ''
-        run: bash scripts/deploy-event.sh "${{ inputs.event }}" "${{ inputs.admin_key }}"
+      # the host code goes in through the environment, so it never shows in a step's title or the logs
+      - name: Deploy
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        env:
+          EVENT_ID: ${{ inputs.event }}
+          ADMIN_KEY: ${{ inputs.admin_key }}
+        run: |
+          [ -n "$ADMIN_KEY" ] && echo "::add-mask::$ADMIN_KEY"
+          bash scripts/deploy-event.sh "$EVENT_ID" "$ADMIN_KEY"
