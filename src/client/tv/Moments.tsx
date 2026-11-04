@@ -142,11 +142,12 @@ export const DRAW_MS = 8000;
 const SPIN = 6200;
 const SURPRISE_MS = 9000;
 
+// segment colors follow the evening's theme (CSS tokens in base.css)
 const WHEEL = [
-  ["#E9B949", "#1C1206"],
-  ["#11523C", "#F3E3C3"],
-  ["#F3E3C3", "#1C1206"],
-  ["#0B3B2B", "#FFE39A"],
+  ["var(--gold)", "var(--ink)"],
+  ["var(--felt-hi)", "var(--almond)"],
+  ["var(--almond)", "var(--ink)"],
+  ["var(--felt)", "var(--gold-hi)"],
 ];
 
 /** Short enough to read on a segment: the emoji and the first words. */
@@ -223,19 +224,19 @@ export function BigWheel({ draw, players, feed }: { draw: DrawState; players: Pl
         <div className="bw-shadow" aria-hidden="true" />
         <Spinner className="bw-spin" target={target} ms={SPIN} ease="cubic-bezier(0.12, 0.72, 0.14, 1)">
         <svg className="bw-wheel" viewBox="-112 -112 224 224">
-          <circle r="110" fill="#4A2A12" stroke="#C9922F" strokeWidth="3" />
+          <circle r="110" style={{ fill: "var(--shell-deep)", stroke: "color-mix(in srgb, var(--gold) 80%, black)" }} strokeWidth="3" />
           {draw.titles.map((t, i) => {
             const surprise = draw.kinds?.[i] === "s";
-            const [bg, fg] = surprise ? ["#8E1B22", "#FFE39A"] : WHEEL[i % WHEEL.length];
+            const [bg, fg] = surprise ? ["var(--wax)", "var(--gold-hi)"] : WHEEL[i % WHEEL.length];
             const mid = i * seg + seg / 2;
             // readable where the wheel comes to rest: labels that would end up upside down are turned around
             const rest = (((mid + target) % 360) + 360) % 360;
             const turn = rest > 0 && rest < 180 ? 270 : 90;
             return (
               <g key={i}>
-                <path d={slice(i * seg, (i + 1) * seg, 100)} fill={bg} stroke="#4A2A12" strokeWidth="0.9" />
+                <path d={slice(i * seg, (i + 1) * seg, 100)} style={{ fill: bg, stroke: "var(--shell-deep)" }} strokeWidth="0.9" />
                 <g transform={`rotate(${mid})`}>
-                  <text x="0" y="-63" transform={`rotate(${turn} 0 -63)`} fill={fg} fontSize={n > 10 ? 6.4 : 7.4} fontWeight="800" textAnchor="middle" dominantBaseline="middle" fontFamily="Rubik, sans-serif">
+                  <text x="0" y="-63" transform={`rotate(${turn} 0 -63)`} style={{ fill: fg }} fontSize={n > 10 ? 6.4 : 7.4} fontWeight="800" textAnchor="middle" dominantBaseline="middle" fontFamily="Rubik, sans-serif">
                     {segLabel(t)}
                   </text>
                 </g>
@@ -255,7 +256,7 @@ export function BigWheel({ draw, players, feed }: { draw: DrawState; players: Pl
             const a = (i * 360) / 28;
             return <circle key={i} className={cls("bw-bulb", i % 2 === 1 && "odd")} cx={Math.sin((a * Math.PI) / 180) * 105} cy={-Math.cos((a * Math.PI) / 180) * 105} r="2.6" />;
           })}
-          <circle r="27" fill="#E9B949" stroke="#4A2A12" strokeWidth="2" />
+          <circle r="27" style={{ fill: "var(--gold)", stroke: "var(--shell-deep)" }} strokeWidth="2" />
           {HUB && <image href={HUB} x="-24" y="-24" width="48" height="48" clipPath="url(#bw-hub)" preserveAspectRatio="xMidYMid slice" />}
         </svg>
         <div className="bw-pointer" aria-hidden="true" />

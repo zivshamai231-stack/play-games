@@ -11,7 +11,7 @@
   position: sticky;
   top: 0;
   z-index: 30;
-  background: rgba(4, 23, 15, 0.96);
+  background: color-mix(in srgb, var(--night) 96%, transparent);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
 }
@@ -49,13 +49,13 @@
   font-size: 0.92rem;
   font-weight: 700;
   color: var(--almond-dim);
-  background: rgba(243, 227, 195, 0.05);
+  background: color-mix(in srgb, var(--almond) 5%, transparent);
   cursor: pointer;
 }
 
 .admin-tab.on {
   color: var(--gold-hi);
-  background: rgba(233, 185, 73, 0.15);
+  background: color-mix(in srgb, var(--gold) 15%, transparent);
   box-shadow: inset 0 0 0 1px var(--gold);
 }
 
@@ -160,17 +160,17 @@
   font-weight: 800;
   white-space: nowrap;
   color: var(--almond-dim);
-  background: rgba(243, 227, 195, 0.08);
+  background: color-mix(in srgb, var(--almond) 8%, transparent);
 }
 
 .status-tag.open {
   color: var(--up);
-  background: rgba(92, 242, 155, 0.15);
+  background: color-mix(in srgb, var(--up) 15%, transparent);
 }
 
 .status-tag.closed {
   color: var(--gold-hi);
-  background: rgba(233, 185, 73, 0.15);
+  background: color-mix(in srgb, var(--gold) 15%, transparent);
 }
 
 .round-item-actions {
@@ -271,7 +271,7 @@
   padding: 3px 10px 3px 4px;
   border-radius: 20px;
   font-size: 0.85rem;
-  background: rgba(243, 227, 195, 0.08);
+  background: color-mix(in srgb, var(--almond) 8%, transparent);
 }
 
 .live-actions {
@@ -348,14 +348,14 @@
   border-radius: 22px;
   font-weight: 500;
   color: var(--almond);
-  background: rgba(243, 227, 195, 0.07);
+  background: color-mix(in srgb, var(--almond) 7%, transparent);
   box-shadow: inset 0 0 0 1px var(--line-soft);
   cursor: pointer;
 }
 
 .pchip.on {
   color: var(--gold-hi);
-  background: rgba(233, 185, 73, 0.2);
+  background: color-mix(in srgb, var(--gold) 20%, transparent);
   box-shadow: inset 0 0 0 2px var(--gold);
 }
 
@@ -434,11 +434,11 @@
 }
 
 .mrow.done {
-  background: rgba(92, 242, 155, 0.08);
+  background: color-mix(in srgb, var(--up) 8%, transparent);
 }
 
 .mrow.pending {
-  background: rgba(233, 185, 73, 0.12);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
 }
 
 .mrow-text {
@@ -461,12 +461,12 @@
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--almond);
-  background: rgba(243, 227, 195, 0.08);
+  background: color-mix(in srgb, var(--almond) 8%, transparent);
   cursor: pointer;
 }
 
 .mini.danger {
-  color: #ffbcbc;
+  color: color-mix(in srgb, var(--gold-lo) 31%, white);
 }
 
 .pool {
@@ -532,7 +532,7 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  box-shadow: 0 0 0 3px #0e4432;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--felt-hi) 83%, black);
 }
 
 .dot.on {
@@ -560,7 +560,7 @@
 
 .settings .danger-title {
   margin-top: 8px;
-  color: #ffbcbc;
+  color: color-mix(in srgb, var(--gold-lo) 31%, white);
 }
 
 /* tv control */
@@ -593,7 +593,7 @@
 }
 
 .tv-mode.on {
-  background: rgba(233, 185, 73, 0.14);
+  background: color-mix(in srgb, var(--gold) 14%, transparent);
   box-shadow: inset 0 0 0 2px var(--gold);
 }
 
@@ -683,7 +683,7 @@
   border-radius: 12px;
   font-weight: 800;
   color: #fff;
-  background: linear-gradient(90deg, #5a1010, #3a0808);
+  background: linear-gradient(90deg, var(--shell-deep), color-mix(in srgb, var(--shell-deep) 63%, black));
   cursor: pointer;
   animation: glow 0.9s ease-in-out infinite alternate;
 }
@@ -713,7 +713,7 @@
   border-radius: 8px;
   border-inline-start: 4px solid var(--gold);
   font-size: 1.05rem;
-  background: rgba(233, 185, 73, 0.08);
+  background: color-mix(in srgb, var(--gold) 8%, transparent);
 }
 
 .mission-picks {
@@ -731,8 +731,8 @@
   text-align: start;
   font-weight: 600;
   color: var(--almond);
-  background: rgba(92, 242, 155, 0.08);
-  box-shadow: inset 0 0 0 1px rgba(92, 242, 155, 0.35);
+  background: color-mix(in srgb, var(--up) 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--up) 35%, transparent);
   cursor: pointer;
 }
 
@@ -799,7 +799,7 @@
   font: inherit;
   font-weight: 800;
   color: var(--almond);
-  background: rgba(243, 227, 195, 0.08);
+  background: color-mix(in srgb, var(--almond) 8%, transparent);
   box-shadow: inset 0 0 0 1.5px var(--line);
   cursor: pointer;
 }
@@ -836,7 +836,7 @@
   padding: 8px 12px;
   border-radius: 10px;
   color: var(--gold-hi);
-  background: rgba(233, 185, 73, 0.1);
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
 }
 
 /* ---------- live TV preview ---------- */
@@ -859,7 +859,7 @@
   aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: 12px;
-  background: #020c08;
+  background: color-mix(in srgb, var(--night) 52%, black);
   box-shadow:
     inset 0 0 0 1px var(--line),
     0 10px 30px rgba(0, 0, 0, 0.4);
@@ -946,7 +946,7 @@
   font-weight: 800;
   white-space: nowrap;
   color: var(--up);
-  background: rgba(92, 242, 155, 0.13);
+  background: color-mix(in srgb, var(--up) 13%, transparent);
 }
 
 .section-head .btn {
@@ -1070,7 +1070,7 @@
 .sb-btn:active,
 .sb-btn.on {
   transform: scale(0.94);
-  background: rgba(233, 185, 73, 0.25);
+  background: color-mix(in srgb, var(--gold) 25%, transparent);
   box-shadow: inset 0 0 0 2px var(--gold);
 }
 
@@ -1081,7 +1081,7 @@
   padding: 6px 16px;
   border-radius: 999px;
   font-weight: 800;
-  color: #1c1206;
+  color: var(--ink);
   background: linear-gradient(180deg, var(--gold-hi), var(--gold));
 }
 
@@ -1122,4 +1122,49 @@
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: 8px;
+}
+
+/* ---------- the evening's colors ---------- */
+
+.theme-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: transparent;
+  color: var(--almond);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.theme-btn.on {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 35%, transparent);
+}
+
+.theme-sw {
+  display: inline-flex;
+}
+
+.theme-sw i {
+  width: 14px;
+  height: 22px;
+}
+
+.theme-sw i:first-child {
+  border-radius: 0 6px 6px 0;
+}
+
+.theme-sw i:last-child {
+  border-radius: 6px 0 0 6px;
 }

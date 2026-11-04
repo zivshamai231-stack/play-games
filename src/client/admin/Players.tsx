@@ -4,7 +4,7 @@ import { cls, fmt, resizeImage } from "../lib";
 import type { Game } from "../net";
 import { Avatar, Money, Sheet, ask, toast } from "../ui";
 import type { Run } from "./AdminApp";
-import { CIRCLES, WORDS } from "../../shared/catalog";
+import { CIRCLES, THEMES, WORDS } from "../../shared/catalog";
 
 export function PlayersTab({ game, view, run }: { game: Game; view: ClientView; run: Run }) {
   const players = view.pub.players;
@@ -278,6 +278,21 @@ function Settings({ view, run }: { view: ClientView; run: Run }) {
           <input value={f.prizeLast} onChange={text("prizeLast")} maxLength={120} />
         </label>
       </div>
+      <fieldset className="field theme-pick">
+        <legend>🎨 הצבעים של הערב (מתחלף מיד בכל המסכים)</legend>
+        <div className="theme-row">
+          {THEMES.map((t) => (
+            <button key={t.id} type="button" className={cls("theme-btn", s.theme === t.id && "on")} onClick={() => run("saveSettings", { settings: { theme: t.id } }, `הצבעים: ${t.name}`)}>
+              <span className="theme-sw" aria-hidden="true">
+                {t.swatch.map((c) => (
+                  <i key={c} style={{ background: c }} />
+                ))}
+              </span>
+              {t.name}
+            </button>
+          ))}
+        </div>
+      </fieldset>
       <label className="check">
         <input type="checkbox" checked={s.allowJoinNew} onChange={(e) => run("saveSettings", { settings: { allowJoinNew: e.target.checked } }, "נשמר")} />
         <span>לאפשר הצטרפות עם שם שלא ברשימה</span>

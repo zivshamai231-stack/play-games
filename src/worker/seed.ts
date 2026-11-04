@@ -26,6 +26,7 @@ export const DEFAULT_SETTINGS: Settings = {
   catchWindow: 30,
   confirmByTarget: false,
   confirmWindow: 120,
+  theme: "casino",
   ...EVENT.settings,
 };
 

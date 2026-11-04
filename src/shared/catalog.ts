@@ -27,3 +27,12 @@ export const CIRCLES = EVENT.circles;
 /** The star's id in the seeded list, and the picture of his face for drawings. */
 export const STAR_ID = EVENT.players.find((p) => p[3])?.[0] ?? null;
 export const STAR_FACE = EVENT.media.face;
+
+/** The evening's colors (the host can switch them live). Swatches: background, accent, paper. */
+export const THEMES: { id: string; name: string; swatch: [string, string, string] }[] = [
+  { id: "casino", name: "קזינו", swatch: ["#0b3b2b", "#e9b949", "#f3e3c3"] },
+  { id: "neon", name: "מועדון", swatch: ["#1a0f3a", "#ff4fd8", "#f1eaff"] },
+  { id: "sunset", name: "שקיעה", swatch: ["#4a1c12", "#ffb347", "#fff1e0"] },
+  { id: "midnight", name: "חצות", swatch: ["#0d1d3d", "#d9dee8", "#e9eef7"] },
+  { id: "rose", name: "רוז", swatch: ["#4a1027", "#f6c1a6", "#fff0f3"] },
+];

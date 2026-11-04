@@ -289,6 +289,11 @@ export function getGame(role: Role) {
 export function useGame(role: Role) {
   const game = getGame(role);
   const snap = useSyncExternalStore(game.subscribe, game.getSnapshot);
+  // the evening's colors: every screen follows the host's choice
+  const theme = snap.view?.pub.settings.theme;
+  useEffect(() => {
+    if (theme) document.documentElement.dataset.theme = theme;
+  }, [theme]);
   return { game, view: snap.view, status: snap.status };
 }
 

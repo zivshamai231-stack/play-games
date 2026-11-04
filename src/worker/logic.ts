@@ -1543,6 +1543,7 @@ const ADMIN: Record<string, Handler> = {
       catchWindow: int(d.catchWindow, cur.catchWindow, 0, 900),
       confirmByTarget: d.confirmByTarget === undefined ? cur.confirmByTarget : !!d.confirmByTarget,
       confirmWindow: int(d.confirmWindow, cur.confirmWindow, 0, 900),
+      theme: ["casino", "neon", "sunset", "midnight", "rose"].includes(String(d.theme)) ? String(d.theme) : cur.theme,
     };
   },
 

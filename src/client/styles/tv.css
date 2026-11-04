@@ -4,14 +4,14 @@ html.is-tv,
 html.is-tv body {
   height: 100%;
   overflow: hidden;
-  background: #020c08;
+  background: color-mix(in srgb, var(--night) 52%, black);
 }
 
 .tv-viewport {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: #020c08;
+  background: color-mix(in srgb, var(--night) 52%, black);
 }
 
 .tv-stage {
@@ -28,8 +28,8 @@ html.is-tv body {
   inset: 0;
   overflow: hidden;
   font-size: 28px;
-  background-color: #04170f;
-  background-image: radial-gradient(140% 100% at 50% -12%, #1c6b4d 0%, #0e4532 50%, #082a1e 100%), var(--noise);
+  background-color: var(--night);
+  background-image: radial-gradient(140% 100% at 50% -12%, color-mix(in srgb, var(--felt-hi) 92%, white) 0%, color-mix(in srgb, var(--felt-hi) 84%, black) 50%, color-mix(in srgb, var(--felt) 71%, black) 100%), var(--noise);
 }
 
 .tv-center {
@@ -107,7 +107,7 @@ html.is-tv body {
   padding: 14px;
   border-radius: 8px;
   color: var(--ink);
-  background: linear-gradient(135deg, #f8ecd2, #e4cf9f);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 25%, white), color-mix(in srgb, var(--gold-lo) 39%, white));
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
   transform: rotate(-2.2deg);
 }
@@ -118,9 +118,9 @@ html.is-tv body {
   gap: 12px;
   padding: 22px 30px 24px;
   border: 4px double var(--shell);
-  outline: 1px solid rgba(138, 90, 43, 0.45);
+  outline: 1px solid color-mix(in srgb, var(--shell) 45%, transparent);
   outline-offset: -12px;
-  background: repeating-radial-gradient(circle at 50% 38%, rgba(138, 90, 43, 0.07) 0 2px, transparent 2px 7px);
+  background: repeating-radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--shell) 7%, transparent) 0 2px, transparent 2px 7px);
 }
 
 .cert-kicker {
@@ -135,10 +135,10 @@ html.is-tv body {
   height: 390px;
   overflow: hidden;
   border-radius: 50% / 46%;
-  background: #2a2318;
-  border: 6px solid #c9922f;
+  background: color-mix(in srgb, var(--gold-hi) 16%, black);
+  border: 6px solid color-mix(in srgb, var(--gold) 82%, black);
   box-shadow:
-    0 0 0 3px #f8ecd2,
+    0 0 0 3px color-mix(in srgb, var(--gold) 25%, white),
     0 0 0 5px var(--shell);
 }
 
@@ -161,7 +161,7 @@ html.is-tv body {
   height: 100%;
   font-family: var(--display);
   font-size: 180px;
-  color: #c9922f;
+  color: color-mix(in srgb, var(--gold) 82%, black);
 }
 
 .cert-name {
@@ -183,7 +183,7 @@ html.is-tv body {
   display: flex;
   justify-content: space-between;
   padding-bottom: 4px;
-  border-bottom: 1px dashed rgba(110, 74, 34, 0.4);
+  border-bottom: 1px dashed color-mix(in srgb, var(--paper-ink) 40%, transparent);
 }
 
 .cert-rows dt {
@@ -336,7 +336,7 @@ html.is-tv body {
   gap: 14px;
   padding: 24px 26px 22px;
   border-radius: 28px;
-  background: linear-gradient(180deg, rgba(17, 82, 60, 0.96), rgba(9, 48, 35, 0.96));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--felt-hi) 96%, transparent), color-mix(in srgb, color-mix(in srgb, var(--felt) 81%, black) 96%, transparent));
   box-shadow:
     inset 0 0 0 2px var(--line),
     0 20px 50px rgba(0, 0, 0, 0.4);
@@ -414,7 +414,7 @@ html.is-tv body {
 
 .backer.up {
   color: var(--up);
-  box-shadow: inset 0 0 0 2px rgba(92, 242, 155, 0.5);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--up) 50%, transparent);
 }
 
 .backer.down {
@@ -425,7 +425,7 @@ html.is-tv body {
   transform: scale(1.04);
   box-shadow:
     inset 0 0 0 4px var(--gold),
-    0 0 90px rgba(233, 185, 73, 0.45),
+    0 0 90px color-mix(in srgb, var(--gold) 45%, transparent),
     0 20px 50px rgba(0, 0, 0, 0.4);
 }
 
@@ -611,7 +611,7 @@ html.is-tv body {
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  box-shadow: 0 0 26px rgba(233, 185, 73, 0.28);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--gold) 28%, transparent);
   display: grid;
   place-items: center;
 }
@@ -624,7 +624,7 @@ html.is-tv body {
 
 .ring-bg {
   fill: rgba(0, 0, 0, 0.38);
-  stroke: rgba(243, 227, 195, 0.12);
+  stroke: color-mix(in srgb, var(--almond) 12%, transparent);
   stroke-width: 10;
 }
 
@@ -664,7 +664,7 @@ html.is-tv body {
 
 .status-pill.live {
   color: var(--up);
-  box-shadow: inset 0 0 0 2px rgba(92, 242, 155, 0.5);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--up) 50%, transparent);
 }
 
 /* ---------- leaderboard ---------- */
@@ -721,7 +721,7 @@ html.is-tv body {
 }
 
 .tvrow.lead {
-  background: linear-gradient(270deg, rgba(233, 185, 73, 0.2), rgba(233, 185, 73, 0.04));
+  background: linear-gradient(270deg, color-mix(in srgb, var(--gold) 20%, transparent), color-mix(in srgb, var(--gold) 4%, transparent));
   box-shadow: inset 0 0 0 2px var(--gold);
 }
 
@@ -800,7 +800,7 @@ html.is-tv body {
   padding: 16px 18px 18px;
   border-radius: 16px;
   color: var(--ink);
-  background: linear-gradient(170deg, #f5e7c8, #e1ca99);
+  background: linear-gradient(170deg, color-mix(in srgb, var(--almond) 90%, white), color-mix(in srgb, var(--gold-lo) 42%, white));
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
   transform-origin: top center;
 }
@@ -823,7 +823,7 @@ html.is-tv body {
   font-family: var(--led);
   font-weight: 900;
   font-size: 30px;
-  color: #1e7a4c;
+  color: color-mix(in srgb, var(--felt-hi) 89%, white);
 }
 
 .reveal-card ul {
@@ -848,11 +848,11 @@ html.is-tv body {
 }
 
 .reveal-card li.done .mark {
-  color: #1e7a4c;
+  color: color-mix(in srgb, var(--felt-hi) 89%, white);
 }
 
 .reveal-card li:not(.done) {
-  color: rgba(28, 18, 6, 0.55);
+  color: color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
 /* ---------- winner ---------- */
@@ -891,7 +891,7 @@ html.is-tv body {
 .podium-step .avatar {
   box-shadow:
     0 0 0 6px var(--gold),
-    0 0 60px rgba(233, 185, 73, 0.5);
+    0 0 60px color-mix(in srgb, var(--gold) 50%, transparent);
 }
 
 .podium-name {
@@ -977,11 +977,11 @@ html.is-tv body {
   gap: 10px;
   padding: 6px 22px;
   border-radius: 16px;
-  background: #060a05;
+  background: color-mix(in srgb, var(--almond-dim) 4%, black);
   box-shadow:
     inset 0 2px 12px rgba(0, 0, 0, 0.9),
-    inset 0 0 0 2px rgba(233, 185, 73, 0.4),
-    0 0 40px rgba(233, 185, 73, 0.15);
+    inset 0 0 0 2px color-mix(in srgb, var(--gold) 40%, transparent),
+    0 0 40px color-mix(in srgb, var(--gold) 15%, transparent);
 }
 
 .tv-pot-amount .led {
@@ -1003,7 +1003,7 @@ html.is-tv body {
   font-size: 52px;
   line-height: 1.15;
   color: var(--gold-hi);
-  text-shadow: 0 0 10px rgba(255, 214, 120, 0.6);
+  text-shadow: 0 0 10px color-mix(in srgb, color-mix(in srgb, var(--gold) 71%, white) 60%, transparent);
   direction: ltr;
 }
 
@@ -1115,7 +1115,7 @@ html.is-tv body {
 
 .tvnight-head h1 {
   font-size: 60px;
-  color: #c8d4ff;
+  color: color-mix(in srgb, var(--felt-hi) 16%, white);
 }
 
 .tvnight-head p {
@@ -1136,7 +1136,7 @@ html.is-tv body {
   gap: 10px;
   padding: 16px 18px;
   border-radius: 20px;
-  background: linear-gradient(180deg, rgba(28, 40, 80, 0.88), rgba(12, 20, 44, 0.92));
+  background: linear-gradient(180deg, color-mix(in srgb, color-mix(in srgb, var(--night) 85%, white) 88%, transparent), color-mix(in srgb, color-mix(in srgb, var(--night) 95%, white) 92%, transparent));
   box-shadow:
     inset 0 0 0 1px rgba(150, 170, 255, 0.25),
     0 16px 40px rgba(0, 0, 0, 0.4);
@@ -1209,12 +1209,12 @@ html.is-tv body {
 .ncard-bar span {
   display: block;
   height: 100%;
-  background: rgba(233, 185, 73, 0.16);
+  background: color-mix(in srgb, var(--gold) 16%, transparent);
   transform-origin: right;
 }
 
 .ncard-opts li.win {
-  background: rgba(233, 185, 73, 0.25);
+  background: color-mix(in srgb, var(--gold) 25%, transparent);
   box-shadow: inset 0 0 0 2px var(--gold);
 }
 
@@ -1236,7 +1236,7 @@ html.is-tv body {
   gap: 22px;
   padding: 18px 28px;
   border-radius: 22px;
-  background: linear-gradient(90deg, #1c0606, #2c0b0b);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--shell-deep) 32%, black), color-mix(in srgb, var(--shell-deep) 52%, black));
   box-shadow:
     inset 0 0 0 3px #ff4d4d,
     0 20px 60px rgba(0, 0, 0, 0.6);
@@ -1266,9 +1266,9 @@ html.is-tv body {
 }
 
 .news.caught {
-  background: linear-gradient(90deg, #2a1604, #3a1d06);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--shell-deep) 54%, black), color-mix(in srgb, var(--shell-deep) 74%, black));
   box-shadow:
-    inset 0 0 0 3px #ff9a3d,
+    inset 0 0 0 3px color-mix(in srgb, var(--gold) 98%, black),
     0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
@@ -1287,7 +1287,7 @@ html.is-tv body {
 }
 
 .news.result {
-  background: linear-gradient(90deg, #0d1530, #142048);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--night) 94%, white), color-mix(in srgb, var(--night) 89%, white));
   box-shadow:
     inset 0 0 0 3px #8ea2ff,
     0 20px 60px rgba(0, 0, 0, 0.6);
@@ -1313,7 +1313,7 @@ html.is-tv body {
   align-items: center;
   justify-items: center;
   padding: 30px 80px 90px;
-  background: radial-gradient(circle at 50% 55%, rgba(4, 23, 15, 0.88), rgba(2, 10, 6, 0.97));
+  background: radial-gradient(circle at 50% 55%, color-mix(in srgb, var(--night) 88%, transparent), color-mix(in srgb, color-mix(in srgb, var(--night) 43%, black) 97%, transparent));
 }
 
 .wheel-title {
@@ -1475,7 +1475,7 @@ html.is-tv body {
 .award-person .avatar {
   box-shadow:
     0 0 0 6px var(--gold),
-    0 0 60px rgba(233, 185, 73, 0.5);
+    0 0 60px color-mix(in srgb, var(--gold) 50%, transparent);
 }
 
 .award-desc {
@@ -1524,8 +1524,8 @@ html.is-tv body {
 /* ---------- letterbox: a projector or laptop that is not 16:9 shows felt, not black bars ---------- */
 
 .tv-viewport {
-  background-color: #020c08;
-  background-image: radial-gradient(120% 120% at 50% 50%, #0b3b2b 0%, #04170f 58%, #020c08 100%), var(--noise);
+  background-color: color-mix(in srgb, var(--night) 52%, black);
+  background-image: radial-gradient(120% 120% at 50% 50%, var(--felt) 0%, var(--night) 58%, color-mix(in srgb, var(--night) 52%, black) 100%), var(--noise);
 }
 
 /* ---------- quiz ---------- */
@@ -1562,7 +1562,7 @@ html.is-tv body {
   min-height: 132px;
   padding: 18px 28px;
   border-radius: 26px;
-  background: linear-gradient(180deg, rgba(17, 82, 60, 0.96), rgba(9, 48, 35, 0.96));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--felt-hi) 96%, transparent), color-mix(in srgb, color-mix(in srgb, var(--felt) 81%, black) 96%, transparent));
   box-shadow:
     inset 0 0 0 2px var(--line),
     0 18px 40px rgba(0, 0, 0, 0.4);
@@ -1621,15 +1621,15 @@ html.is-tv body {
 
 .qopt.right {
   transform: scale(1.03);
-  background: linear-gradient(180deg, rgba(24, 128, 84, 0.98), rgba(10, 72, 47, 0.98));
+  background: linear-gradient(180deg, color-mix(in srgb, color-mix(in srgb, var(--felt-hi) 89%, white) 98%, transparent), color-mix(in srgb, color-mix(in srgb, var(--felt-hi) 84%, black) 98%, transparent));
   box-shadow:
     inset 0 0 0 5px var(--up),
-    0 0 90px rgba(92, 242, 155, 0.42),
+    0 0 90px color-mix(in srgb, var(--up) 42%, transparent),
     0 18px 40px rgba(0, 0, 0, 0.4);
 }
 
 .qopt.right .qopt-letter {
-  background: radial-gradient(circle at 35% 30%, #c9ffe0, var(--up) 60%, #1f9e5a);
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--felt-hi) 15%, white), var(--up) 60%, #1f9e5a);
 }
 
 .qopt.wrong {
@@ -1650,8 +1650,8 @@ html.is-tv body {
   align-items: center;
   padding: 26px 60px 44px;
   background:
-    radial-gradient(70% 60% at 50% 45%, rgba(233, 185, 73, 0.18), transparent 70%),
-    radial-gradient(110% 90% at 50% 40%, rgba(142, 27, 34, 0.96), rgba(38, 4, 8, 0.98));
+    radial-gradient(70% 60% at 50% 45%, color-mix(in srgb, var(--gold) 18%, transparent), transparent 70%),
+    radial-gradient(110% 90% at 50% 40%, color-mix(in srgb, var(--wax) 96%, transparent), color-mix(in srgb, color-mix(in srgb, var(--shell-deep) 41%, black) 98%, transparent));
 }
 
 .shot-title {
@@ -1662,7 +1662,7 @@ html.is-tv body {
   color: var(--gold-hi);
   text-shadow:
     0 8px 0 rgba(0, 0, 0, 0.45),
-    0 0 60px rgba(233, 185, 73, 0.5);
+    0 0 60px color-mix(in srgb, var(--gold) 50%, transparent);
 }
 
 .shot-faces {
@@ -1748,29 +1748,29 @@ html.is-tv body {
   overflow: hidden;
   display: grid;
   place-items: center;
-  background: radial-gradient(110% 90% at 50% 35%, #1d5e45 0%, #0b2a1e 60%, #04110b 100%);
+  background: radial-gradient(110% 90% at 50% 35%, color-mix(in srgb, var(--felt-hi) 95%, white) 0%, color-mix(in srgb, var(--felt-hi) 51%, black) 60%, color-mix(in srgb, var(--night) 74%, black) 100%);
 }
 
 .spot-fast {
-  background: #0d0a02;
+  background: color-mix(in srgb, var(--gold-lo) 8%, black);
 }
 
 .spot-win,
 .spot-mission {
-  background: radial-gradient(110% 90% at 50% 35%, #5a1a6e 0%, #2a0a36 55%, #12051a 100%);
+  background: radial-gradient(110% 90% at 50% 35%, #5a1a6e 0%, color-mix(in srgb, var(--almond) 15%, black) 55%, color-mix(in srgb, var(--almond) 7%, black) 100%);
 }
 
 .spot-lose,
 .spot-broke {
-  background: radial-gradient(110% 90% at 50% 35%, #1b2a4a 0%, #0b1426 60%, #05080f 100%);
+  background: radial-gradient(110% 90% at 50% 35%, color-mix(in srgb, var(--night) 86%, white) 0%, color-mix(in srgb, var(--night) 96%, white) 60%, color-mix(in srgb, var(--felt-hi) 15%, black) 100%);
 }
 
 .spot-shot {
-  background: radial-gradient(110% 90% at 50% 40%, #8e1b22 0%, #3a060b 60%, #1a0204 100%);
+  background: radial-gradient(110% 90% at 50% 40%, var(--wax) 0%, color-mix(in srgb, var(--shell-deep) 63%, black) 60%, color-mix(in srgb, var(--shell-deep) 27%, black) 100%);
 }
 
 .spot-slow {
-  background: radial-gradient(110% 90% at 50% 40%, #33441f 0%, #141c0b 65%, #070a03 100%);
+  background: radial-gradient(110% 90% at 50% 40%, color-mix(in srgb, var(--gold-hi) 24%, black) 0%, color-mix(in srgb, var(--gold-hi) 9%, black) 65%, color-mix(in srgb, var(--gold) 4%, black) 100%);
 }
 
 /* the siren for a finished mission, the rain for someone going broke */
@@ -1946,7 +1946,7 @@ html.is-tv body {
   color: var(--gold-hi);
   text-shadow:
     0 8px 0 rgba(0, 0, 0, 0.45),
-    0 0 60px rgba(233, 185, 73, 0.45);
+    0 0 60px color-mix(in srgb, var(--gold) 45%, transparent);
 }
 
 .spot.many .spot-title {
@@ -1969,7 +1969,7 @@ html.is-tv body {
   font-weight: 800;
   line-height: 1.25;
   text-wrap: balance;
-  color: #fff8e6;
+  color: color-mix(in srgb, var(--gold-hi) 25%, white);
   text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
 }
 
@@ -2018,8 +2018,8 @@ html.is-tv body {
   place-content: center;
   justify-items: center;
   gap: 34px;
-  background-color: #04170f;
-  background-image: radial-gradient(120% 90% at 50% 30%, #1c6b4d 0%, #0b3b2b 50%, #04170f 100%), var(--noise);
+  background-color: var(--night);
+  background-image: radial-gradient(120% 90% at 50% 30%, color-mix(in srgb, var(--felt-hi) 92%, white) 0%, var(--felt) 50%, var(--night) 100%), var(--noise);
 }
 
 .reel-title {
@@ -2036,7 +2036,7 @@ html.is-tv body {
   height: 450px;
   overflow: hidden;
   border-radius: 32px;
-  background: linear-gradient(180deg, #1f1006, #4a2a12 50%, #1f1006);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--shell-deep) 41%, black), var(--shell-deep) 50%, color-mix(in srgb, var(--shell-deep) 41%, black));
   box-shadow:
     inset 0 0 0 6px var(--gold),
     0 30px 70px rgba(0, 0, 0, 0.6);
@@ -2048,7 +2048,7 @@ html.is-tv body {
   inset: 150px 0 auto;
   height: 150px;
   border-block: 4px solid var(--gold);
-  background: rgba(233, 185, 73, 0.08);
+  background: color-mix(in srgb, var(--gold) 8%, transparent);
   pointer-events: none;
 }
 
@@ -2068,12 +2068,12 @@ html.is-tv body {
   font-size: 48px;
   white-space: nowrap;
   text-overflow: ellipsis;
-  color: rgba(243, 227, 195, 0.75);
+  color: color-mix(in srgb, var(--almond) 75%, transparent);
 }
 
 .reel-item.landed {
   color: var(--gold-hi);
-  text-shadow: 0 0 30px rgba(233, 185, 73, 0.8);
+  text-shadow: 0 0 30px color-mix(in srgb, var(--gold) 80%, transparent);
   animation: pulse 0.4s ease-in-out infinite alternate;
 }
 
@@ -2091,7 +2091,7 @@ html.is-tv body {
   width: 300px;
   height: 300px;
   object-fit: cover;
-  border: 10px solid #fff8e6;
+  border: 10px solid color-mix(in srgb, var(--gold-hi) 25%, white);
   border-radius: 20px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
 }
@@ -2184,7 +2184,7 @@ html.is-tv body {
 .king-face {
   box-shadow:
     0 0 0 4px var(--gold),
-    0 0 40px rgba(233, 185, 73, 0.6);
+    0 0 40px color-mix(in srgb, var(--gold) 60%, transparent);
 }
 
 .king-face img {
@@ -2228,7 +2228,7 @@ html.is-tv body {
   padding: 14px 24px 14px 14px;
   border-radius: 28px;
   color: var(--ink);
-  background: rgba(255, 248, 230, 0.97);
+  background: color-mix(in srgb, color-mix(in srgb, var(--gold-hi) 25%, white) 97%, transparent);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
 }
 
@@ -2265,7 +2265,7 @@ html.is-tv body {
   margin: 0;
   padding: 18px 18px 74px;
   border-radius: 14px;
-  background: #fff8e6;
+  background: color-mix(in srgb, var(--gold-hi) 25%, white);
   box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6);
 }
 
@@ -2365,7 +2365,7 @@ html.is-tv body {
   font-size: 84px;
   line-height: 1;
   color: var(--gold-hi);
-  text-shadow: 0 0 26px rgba(233, 185, 73, 0.6);
+  text-shadow: 0 0 26px color-mix(in srgb, var(--gold) 60%, transparent);
 }
 
 .cc-bar {
@@ -2464,7 +2464,7 @@ html.is-tv body {
   width: 430px;
   padding: 18px 22px 10px 24px;
   /* felt-green glass, not a black slab */
-  background: linear-gradient(90deg, rgba(17, 82, 60, 0.42) 65%, rgba(17, 82, 60, 0));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--felt-hi) 42%, transparent) 65%, color-mix(in srgb, var(--felt-hi) 0%, transparent));
   pointer-events: none;
 }
 
@@ -2513,7 +2513,7 @@ html.is-tv body {
 }
 
 .chat-line.gift .chat-text {
-  color: #ffd1e8;
+  color: color-mix(in srgb, var(--shell) 15%, white);
 }
 
 .chat-line.emoji .chat-text {
@@ -2557,7 +2557,7 @@ html.is-tv body {
   font-weight: 800;
   font-size: 40px;
   line-height: 1.2;
-  color: #fff8e6;
+  color: color-mix(in srgb, var(--gold-hi) 25%, white);
 }
 
 .lobby-crowd {
@@ -2593,10 +2593,10 @@ html.is-tv body {
   grid-template-rows: auto 1fr;
   justify-items: center;
   padding-top: 18px;
-  background-color: #04170f;
+  background-color: var(--night);
   background-image:
-    radial-gradient(60% 70% at 50% 55%, rgba(233, 185, 73, 0.22), transparent 70%),
-    radial-gradient(120% 90% at 50% 30%, #1c6b4d 0%, #0b3b2b 50%, #04170f 100%),
+    radial-gradient(60% 70% at 50% 55%, color-mix(in srgb, var(--gold) 22%, transparent), transparent 70%),
+    radial-gradient(120% 90% at 50% 30%, color-mix(in srgb, var(--felt-hi) 92%, white) 0%, var(--felt) 50%, var(--night) 100%),
     var(--noise);
 }
 
@@ -2608,7 +2608,7 @@ html.is-tv body {
   color: var(--gold-hi);
   text-shadow:
     0 6px 0 rgba(0, 0, 0, 0.45),
-    0 0 50px rgba(233, 185, 73, 0.5);
+    0 0 50px color-mix(in srgb, var(--gold) 50%, transparent);
 }
 
 .bw-stage {
@@ -2645,12 +2645,12 @@ html.is-tv body {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #8e1b22;
+  background: var(--wax);
   box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.3);
 }
 
 .bw-bulb {
-  fill: #fff8e6;
+  fill: color-mix(in srgb, var(--gold-hi) 25%, white);
   animation: bw-blink 0.5s steps(2, jump-none) infinite;
 }
 
@@ -2664,7 +2664,7 @@ html.is-tv body {
 
 @keyframes bw-blink {
   50% {
-    fill: #e9b949;
+    fill: var(--gold);
     opacity: 0.35;
   }
 }
@@ -2718,7 +2718,7 @@ html.is-tv body {
   font-weight: 900;
   line-height: 1.3;
   vertical-align: middle;
-  color: #1c1206;
+  color: var(--ink);
   background: linear-gradient(180deg, var(--gold-hi), var(--gold));
   box-shadow:
     0 0 0 3px var(--wax),
@@ -2739,7 +2739,7 @@ html.is-tv body {
   font-size: 30px;
   font-weight: 800;
   color: #fff;
-  background: linear-gradient(90deg, #8e1b22, #b3242d);
+  background: linear-gradient(90deg, var(--wax), #b3242d);
   box-shadow: 0 0 0 3px var(--gold);
 }
 
@@ -2775,7 +2775,7 @@ html.is-tv body {
   gap: 8px;
   padding: 18px 14px 16px;
   border-radius: 26px;
-  background: linear-gradient(180deg, rgba(17, 82, 60, 0.96), rgba(9, 48, 35, 0.96));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--felt-hi) 96%, transparent), color-mix(in srgb, color-mix(in srgb, var(--felt) 81%, black) 96%, transparent));
   box-shadow:
     inset 0 0 0 2px var(--line),
     0 18px 40px rgba(0, 0, 0, 0.4);
@@ -2793,7 +2793,7 @@ html.is-tv body {
   background: linear-gradient(180deg, #b3242d, #6e1016);
   box-shadow:
     0 0 0 5px var(--gold),
-    0 0 60px rgba(233, 185, 73, 0.55),
+    0 0 60px color-mix(in srgb, var(--gold) 55%, transparent),
     0 18px 40px rgba(0, 0, 0, 0.5);
 }
 
@@ -2878,7 +2878,7 @@ html.is-tv body {
   inset: 0 0 62px;
   z-index: 43;
   overflow: hidden;
-  background: #04170f;
+  background: var(--night);
 }
 
 .idle-slide {
@@ -2902,7 +2902,7 @@ html.is-tv body {
   position: relative;
   max-width: 1400px;
   max-height: 740px;
-  border: 12px solid #fff8e6;
+  border: 12px solid color-mix(in srgb, var(--gold-hi) 25%, white);
   border-radius: 22px;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
   rotate: -1.5deg;
@@ -2931,7 +2931,7 @@ html.is-tv body {
   font-weight: 800;
   text-align: center;
   color: var(--gold-hi);
-  background: rgba(4, 23, 15, 0.82);
+  background: color-mix(in srgb, var(--night) 82%, transparent);
   box-shadow: 0 0 0 3px var(--gold);
 }
 
@@ -2944,7 +2944,7 @@ html.is-tv body {
   font-size: 26px;
   font-weight: 700;
   color: var(--almond);
-  background: rgba(4, 23, 15, 0.75);
+  background: color-mix(in srgb, var(--night) 75%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2977,7 +2977,7 @@ html.is-tv body {
   margin: 0;
   padding: 12px 12px 10px;
   border-radius: 10px;
-  background: #fff8e6;
+  background: color-mix(in srgb, var(--gold-hi) 25%, white);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
   transition:
     opacity 0.4s,
@@ -3011,13 +3011,13 @@ html.is-tv body {
   font-size: 30px;
   font-weight: 800;
   text-align: center;
-  color: #1c1206;
+  color: var(--ink);
 }
 
 .photo-card.won {
   box-shadow:
     0 0 0 8px var(--gold),
-    0 0 70px rgba(233, 185, 73, 0.7);
+    0 0 70px color-mix(in srgb, var(--gold) 70%, transparent);
 }
 
 .photo-card.dim {
@@ -3036,7 +3036,7 @@ html.is-tv body {
   font-size: 46px;
   text-align: center;
   color: var(--gold-hi);
-  background: #1c1206;
+  background: var(--ink);
   box-shadow: 0 0 0 3px var(--gold);
 }
 
@@ -3110,14 +3110,14 @@ html.is-tv body {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: rgba(243, 227, 195, 0.2);
+  background: color-mix(in srgb, var(--almond) 20%, transparent);
 }
 
 .rule-dots i.done {
-  background: rgba(233, 185, 73, 0.55);
+  background: color-mix(in srgb, var(--gold) 55%, transparent);
 }
 
 .rule-dots i.on {
   background: var(--gold-hi);
-  box-shadow: 0 0 18px rgba(255, 227, 154, 0.8);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--gold-hi) 80%, transparent);
 }

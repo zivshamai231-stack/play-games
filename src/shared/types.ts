@@ -34,6 +34,8 @@ export interface Settings {
   confirmByTarget: boolean;
   /** seconds the target has to answer */
   confirmWindow: number;
+  /** the evening's colors: casino, neon, sunset, midnight, rose */
+  theme: string;
 }
 
 export interface PlayerRec {
