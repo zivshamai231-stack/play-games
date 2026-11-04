@@ -9,7 +9,7 @@ import { QR } from "../qr";
 import { hush, prefetchLine, sfx, speak } from "../sound";
 import { Avatar, Change, Coin, FunnyFace, Led, Marquee, Money, Podium, Spark, burst } from "../ui";
 import { Spotlight, holdTv, loseKind, tvBusy } from "./Moments";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { WORDS } from "../../shared/catalog";
 
 /** Run a sequence of [phase, ms] steps; each entry fires its callback. Returns a cleanup. */
 function runSteps<P>(steps: [P, number][], enter: (p: P) => void, done: () => void) {

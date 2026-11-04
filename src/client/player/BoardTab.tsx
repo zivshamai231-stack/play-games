@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import type { ClientView } from "../../shared/types";
 import { cls, kingAndLast, ranked } from "../lib";
 import { Avatar, Change, Money, Podium, Spark } from "../ui";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { WORDS } from "../../shared/catalog";
 
 export function BoardTab({ view, meId }: { view: ClientView; meId: string }) {
   const list = ranked(view.pub.players);

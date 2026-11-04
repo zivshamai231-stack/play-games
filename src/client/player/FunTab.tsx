@@ -5,7 +5,7 @@ import { cls, resizeImage } from "../lib";
 import type { Game } from "../net";
 import { sfx } from "../sound";
 import { Avatar, Money, ask, burst, toast } from "../ui";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { WORDS } from "../../shared/catalog";
 
 /** Everything you can throw at the big screen, and the gift shop. */
 export function FunTab({ game, view, me }: { game: Game; view: ClientView; me: PlayerPub }) {

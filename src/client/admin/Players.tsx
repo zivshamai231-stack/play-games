@@ -4,7 +4,7 @@ import { cls, fmt, resizeImage } from "../lib";
 import type { Game } from "../net";
 import { Avatar, Money, Sheet, ask, toast } from "../ui";
 import type { Run } from "./AdminApp";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { CIRCLES, WORDS } from "../../shared/catalog";
 
 export function PlayersTab({ game, view, run }: { game: Game; view: ClientView; run: Run }) {
   const players = view.pub.players;
@@ -98,6 +98,7 @@ function PlayerForm({ value, game, run, onDone }: { value: PlayerPub | null; gam
   const [ticker, setTicker] = useState(value?.ticker ?? "");
   const [isGroom, setIsGroom] = useState(value?.isGroom ?? false);
   const [photo, setPhoto] = useState<string | null>(value?.photo ?? null);
+  const [circle, setCircle] = useState(value?.circle ?? "");
   const [busy, setBusy] = useState(false);
   const preview = { id: value?.id ?? "new", name: name || "?", photo, isGroom };
 
@@ -118,7 +119,7 @@ function PlayerForm({ value, game, run, onDone }: { value: PlayerPub | null; gam
       className="form"
       onSubmit={async (e) => {
         e.preventDefault();
-        const ok = await run("savePlayer", { player: { id: value?.id, name, ticker, isGroom, photo } }, "נשמר");
+        const ok = await run("savePlayer", { player: { id: value?.id, name, ticker, isGroom, photo, circle } }, "נשמר");
         if (ok) onDone();
       }}
     >
@@ -141,6 +142,15 @@ function PlayerForm({ value, game, run, onDone }: { value: PlayerPub | null; gam
       <label className="field">
         <span>סימול מניה (באנגלית, עד 5 אותיות)</span>
         <input dir="ltr" value={ticker} onChange={(e) => setTicker(e.target.value.toUpperCase())} maxLength={5} />
+      </label>
+      <label className="field">
+        <span>מאיפה מכיר את {WORDS.star} (המשימות מחברות בין עולמות)</span>
+        <input value={circle} onChange={(e) => setCircle(e.target.value)} maxLength={20} list="circles" />
+        <datalist id="circles">
+          {CIRCLES.map((c) => (
+            <option key={c} value={c} />
+          ))}
+        </datalist>
       </label>
       <label className="check">
         <input type="checkbox" checked={isGroom} onChange={(e) => setIsGroom(e.target.checked)} />
@@ -271,6 +281,10 @@ function Settings({ view, run }: { view: ClientView; run: Run }) {
       <label className="check">
         <input type="checkbox" checked={s.allowJoinNew} onChange={(e) => run("saveSettings", { settings: { allowJoinNew: e.target.checked } }, "נשמר")} />
         <span>לאפשר הצטרפות עם שם שלא ברשימה</span>
+      </label>
+      <label className="check">
+        <input type="checkbox" checked={s.confirmByTarget} onChange={(e) => run("saveSettings", { settings: { confirmByTarget: e.target.checked } }, "נשמר")} />
+        <span>מי שעבדו עליו מאשר בטלפון שהמשימה באמת קרתה (נגד רמאות)</span>
       </label>
       <button type="button" className="btn btn-ghost btn-s" onClick={() => run("saveSettings", { settings: f }, "ההגדרות נשמרו")}>
         שמירת הגדרות

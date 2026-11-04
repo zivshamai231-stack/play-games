@@ -4,15 +4,27 @@ import { cls, fmt } from "../lib";
 import { creds, type Game } from "../net";
 import { sfx } from "../sound";
 import { Avatar, Marquee, toast } from "../ui";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { CIRCLES, WORDS } from "../../shared/catalog";
 
 export function JoinScreen({ game, view }: { game: Game; view: ClientView }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
   const [showNew, setShowNew] = useState(false);
   const { startBalance, currency, allowJoinNew } = view.pub.settings;
+  // a party with circles asks one more thing before you're in: how you know the star (and whether you want missions)
+  const [step, setStep] = useState<{ payload: { playerId?: string; name?: string }; key: string; who: string } | null>(null);
+  const [circle, setCircle] = useState<string | null>(null);
+  const [spectator, setSpectator] = useState(false);
+  const star = view.pub.players.find((p) => p.isGroom);
 
-  const join = async (payload: { playerId?: string; name?: string }, key: string) => {
+  const pick = (payload: { playerId?: string; name?: string }, key: string, who: string, known: string | null) => {
+    if (!CIRCLES.length) return void join(payload, key);
+    setCircle(known);
+    setSpectator(false);
+    setStep({ payload, key, who });
+  };
+
+  const join = async (payload: { playerId?: string; name?: string; circle?: string | null; spectator?: boolean }, key: string) => {
     setBusy(key);
     try {
       const r = await game.act<{ token: string }>("join", payload);
@@ -25,6 +37,32 @@ export function JoinScreen({ game, view }: { game: Game; view: ClientView }) {
       setBusy(null);
     }
   };
+
+  if (step)
+    return (
+      <div className="join">
+        <h1 className="join-title">היי {step.who} 👋</h1>
+        <p className="join-lede">{star && !(step.payload.playerId === star.id) ? `מאיפה אתה מכיר את ${star.name}?` : "מאיזה עולם אתה מגיע?"}</p>
+        <div className="join-circles" role="radiogroup">
+          {CIRCLES.map((c) => (
+            <button key={c} type="button" role="radio" aria-checked={circle === c} className={cls("circle-chip", circle === c && "on")} onClick={() => setCircle(c)}>
+              {c}
+            </button>
+          ))}
+        </div>
+        <p className="join-hint">המשימות הסודיות שלך יהיו בעיקר על אנשים מעולמות אחרים. ככה מכירים.</p>
+        <label className="check join-spectator">
+          <input type="checkbox" checked={spectator} onChange={(e) => setSpectator(e.target.checked)} />
+          <span>רק מהמר ומצביע, בלי משימות סודיות</span>
+        </label>
+        <button type="button" className="btn btn-gold join-go" disabled={!circle || !!busy} onClick={() => void join({ ...step.payload, circle, spectator }, step.key)}>
+          {busy ? "נכנס…" : "נכנסים למשחק"}
+        </button>
+        <button type="button" className="link-btn" onClick={() => setStep(null)}>
+          חזרה
+        </button>
+      </div>
+    );
 
   return (
     <div className="join">
@@ -43,7 +81,7 @@ export function JoinScreen({ game, view }: { game: Game; view: ClientView }) {
             onClick={() =>
               p.claimed
                 ? toast(`${p.name} כבר מחובר ממכשיר אחר. אם זה אתם, בקשו מהמנחה לשחרר את השם.`, "info", 5000)
-                : join({ playerId: p.id }, p.id)
+                : pick({ playerId: p.id }, p.id, p.name, p.circle)
             }
           >
             <span className="card-corner top" aria-hidden="true">
@@ -64,7 +102,7 @@ export function JoinScreen({ game, view }: { game: Game; view: ClientView }) {
             className="join-new"
             onSubmit={(e) => {
               e.preventDefault();
-              void join({ name: newName }, "new");
+              pick({ name: newName.trim() }, "new", newName.trim(), null);
             }}
           >
             <label className="field">

@@ -5,7 +5,7 @@ import { LETTERS, cls, fmt, fmtX, mmss, multiplier, potOf, resizeImage } from ".
 import { type Game, useServerNow } from "../net";
 import { Avatar, Money, Sheet, ask, toast } from "../ui";
 import { type Run, WheelButtons } from "./AdminApp";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { WORDS } from "../../shared/catalog";
 
 const STATUS: Record<RoundStatus, string> = { draft: "מוכן", open: "פתוח", closed: "סגור", resolved: "הוכרע" };
 

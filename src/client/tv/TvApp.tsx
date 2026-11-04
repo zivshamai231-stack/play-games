@@ -10,7 +10,7 @@ import { CatchClock, ChatLog, FxLayer, MusicDirector, MysterySpot, ShoutsLayer, 
 import { IdleShow } from "./Idle";
 import { BettingVibes, BigWheel, Spinner, Spotlight, holdTv, spinLength, tvBusy } from "./Moments";
 import { AwardsScreen, BoardScreen, Lobby, NightScreen, PhotoScreen, QuizScreen, RevealScreen, RoundScreen, RulesScreen, VoteScreen, WinnerScreen } from "./Screens";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { WORDS } from "../../shared/catalog";
 
 // the host screen embeds a silent copy of the TV as a preview
 const PREVIEW = new URLSearchParams(location.search).has("preview");

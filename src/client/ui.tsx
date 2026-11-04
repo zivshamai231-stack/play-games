@@ -6,7 +6,7 @@ import type { PlayerPub } from "../shared/types";
 import { cls, fmt, pct, photoOf, ranked, reducedMotion, signed } from "./lib";
 import type { ConnStatus } from "./net";
 import { setMuted, sfx, useMuted } from "./sound";
-import { WORDS, MEDIA } from "../shared/catalog";
+import { WORDS } from "../shared/catalog";
 
 /* ---------- shared SVG paint (defined once so gradients never collide) ---------- */
 

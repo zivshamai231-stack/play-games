@@ -3,7 +3,7 @@ import type { Audience, ClientView, Mission, PlayerPub } from "../../shared/type
 import { cls, showTemplate } from "../lib";
 import { Avatar, Money, Sheet, ask } from "../ui";
 import type { Run } from "./AdminApp";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { WORDS } from "../../shared/catalog";
 
 const AUD: Record<Audience, string> = { all: "לכולם", friends: `לחברים (לא ל${WORDS.star.replace(/^ה/, "")})`, groom: `רק ל${WORDS.star.replace(/^ה/, "")}` };
 const STATUS_ICON: Record<Mission["status"], string> = { open: "✉️", pending: "⏳", confirm: "🙋", done: "✅", burned: "🔥" };
@@ -121,9 +121,9 @@ export function MissionsTab({ view, run }: { view: ClientView; run: Run }) {
                         החלפה
                       </button>
                     )}
-                    {m.status === "open" || m.status === "pending" ? (
+                    {m.status === "open" || m.status === "pending" || m.status === "confirm" ? (
                       <button type="button" className="mini" onClick={() => run("reviewMission", { missionId: m.id, approve: true }, "שולם ונחשף בטלוויזיה")}>
-                        {m.status === "pending" ? "לאשר עכשיו" : "סימון כבוצעה"}
+                        {m.status === "pending" || m.status === "confirm" ? "לאשר עכשיו" : "סימון כבוצעה"}
                       </button>
                     ) : (
                       <button type="button" className="mini" onClick={() => run("reviewMission", { missionId: m.id, approve: false }, "הסימון בוטל")}>

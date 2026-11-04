@@ -4,7 +4,7 @@ import type { ClientView, PlayerPub } from "../../shared/types";
 import { cls, mmss } from "../lib";
 import { type Game, useServerNow } from "../net";
 import { sfx } from "../sound";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { WORDS } from "../../shared/catalog";
 
 export type Tab = "bet" | "missions" | "board" | "fun";
 

@@ -11,7 +11,7 @@ import { MissionsTab } from "./Missions";
 import { PlayersTab } from "./Players";
 import { RoundsTab } from "./Rounds";
 import { RodeoPhoto } from "../rodeo";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { WORDS } from "../../shared/catalog";
 
 // /admin#key=123456 logs the host in once and keeps the code on this device
 {

@@ -5,7 +5,7 @@ import { cls, fmt, mmss } from "../lib";
 import { type Game, useServerNow } from "../net";
 import { sfx } from "../sound";
 import { Avatar, Money, Sheet, ask, burst, toast } from "../ui";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { WORDS } from "../../shared/catalog";
 
 const tierOf = (reward: number) => (reward >= 200 ? "קשה" : reward >= 150 ? "בינונית" : "קלה");
 
@@ -33,7 +33,11 @@ export function MissionsTab({ game, view }: { game: Game; view: ClientView }) {
         </div>
       </header>
 
-      {!missions.length && (
+      {me.missions.length === 0 && view.pub.players.find((p) => p.id === me.id)?.spectator ? (
+        <SpectatorCard game={game} on />
+      ) : null}
+
+      {!missions.length && !view.pub.players.find((p) => p.id === me.id)?.spectator && (
         <div className="idle felt">
           <span className="idle-dice" aria-hidden="true">
             ✉️
@@ -61,7 +65,40 @@ export function MissionsTab({ game, view }: { game: Game; view: ClientView }) {
       )}
 
       <CatchCard game={game} view={view} />
+      {missions.length > 0 && missions.every((m) => m.status === "open") && <SpectatorCard game={game} on={false} />}
     </section>
+  );
+}
+
+/** In or out of the secret missions. */
+function SpectatorCard({ game, on }: { game: Game; on: boolean }) {
+  const [busy, setBusy] = useState(false);
+  const flip = async () => {
+    setBusy(true);
+    try {
+      await game.act("setSpectator", { on: !on });
+      toast(on ? "✉️ המשימות בדרך אליך" : "👀 אתה במצב צופה. מהמר ומצביע, בלי משימות", "ok");
+    } catch (e) {
+      toast((e as Error).message, "err");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return on ? (
+    <div className="idle felt">
+      <span className="idle-dice" aria-hidden="true">
+        👀
+      </span>
+      <h2>אתה במצב צופה</h2>
+      <p>מהמר, מצביע ותופס אחרים, בלי משימות סודיות משלך.</p>
+      <button type="button" className="btn btn-gold" disabled={busy} onClick={flip}>
+        בעצם, תנו לי משימות
+      </button>
+    </div>
+  ) : (
+    <button type="button" className="link-btn spectator-out" disabled={busy} onClick={flip}>
+      לא בא לי משימות הערב. רק להמר ולהצביע
+    </button>
   );
 }
 
@@ -69,6 +106,8 @@ function Envelope({ m, game, view }: { m: Mission; game: Game; view: ClientView 
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const pending = m.status === "pending";
+  const confirming = m.status === "confirm";
+  const denied = m.status === "open" && m.deniedBy ? view.pub.players.find((p) => p.id === m.deniedBy)?.name ?? "מי שעבדת עליו" : null;
   const now = useServerNow(game, pending, 500);
   const left = pending && m.claimedAt ? Math.max(0, m.claimedAt + view.pub.settings.catchWindow * 1000 - now) : 0;
   const names = [...new Set(Object.values(m.targets))].map((id) => view.pub.players.find((p) => p.id === id)?.name).filter(Boolean);
@@ -136,7 +175,7 @@ function Envelope({ m, game, view }: { m: Mission; game: Game; view: ClientView 
     }
   };
 
-  const hint = m.status === "done" ? "בוצעה" : pending ? `⏳ ${mmss(left)}` : open ? "הקישו לסגירה" : "הקישו לפתיחה";
+  const hint = m.status === "done" ? "בוצעה" : confirming ? "🙋 מחכה לאישור" : pending ? `⏳ ${mmss(left)}` : open ? "הקישו לסגירה" : "הקישו לפתיחה";
 
   return (
     <article className={cls("envelope", `st-${m.status}`, open && "unsealed")}>
@@ -172,7 +211,15 @@ function Envelope({ m, game, view }: { m: Mission; game: Game; view: ClientView 
           >
             <div className="env-paper">
               <p className="env-text">{m.text}</p>
-              {pending ? (
+              {denied && <p className="env-denied">🙅 {denied} אמר שזה לא קרה. אפשר לנסות שוב.</p>}
+              {confirming ? (
+                <div className="env-done">
+                  <span>🙋 עברת את חלון התפיסה. מחכים ש{payer} יאשר שזה קרה</span>
+                  <button type="button" className="link-btn" onClick={unclaim} disabled={busy}>
+                    ביטול
+                  </button>
+                </div>
+              ) : pending ? (
                 <div className="env-done">
                   <span>
                     ⏳ {mmss(left)} לשרוד. לא יתפסו אותך? {payer} משלם לך <Money n={m.reward} size={16} />

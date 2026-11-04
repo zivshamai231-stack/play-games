@@ -4,7 +4,7 @@ import type { ClientView, RoundPub } from "../../shared/types";
 import { cls, lsGet, lsSet } from "../lib";
 import { sfx } from "../sound";
 import { Money, burst, toast } from "../ui";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { WORDS } from "../../shared/catalog";
 
 interface Flash {
   kind: "win" | "lose" | "mission" | "drink" | "caught";

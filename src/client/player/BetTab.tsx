@@ -7,7 +7,7 @@ import { type Game, useServerNow } from "../net";
 import { sfx } from "../sound";
 import { RodeoItay } from "../rodeo";
 import { Avatar, Change, Coin, Money, Spark, ask, burst, toast } from "../ui";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { WORDS } from "../../shared/catalog";
 
 export function BetTab({ game, view, me }: { game: Game; view: ClientView; me: PlayerPub }) {
   const round = view.pub.round;

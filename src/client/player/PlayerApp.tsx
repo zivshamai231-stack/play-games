@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { ClientView, PlayerPub } from "../../shared/types";
+import type { ClientView, MeView, PlayerPub } from "../../shared/types";
 import { cls, fmt, keepAwake, kingAndLast, lsGet, lsSet, resizeImage, useMedia } from "../lib";
 import { creds, useGame, type Game } from "../net";
 import { setMuted, sfx, useMuted } from "../sound";
@@ -12,7 +12,7 @@ import { MissionsTab } from "./MissionsTab";
 import { RodeoPhoto, useIntro } from "../rodeo";
 import { FeedWatcher, MissionWatcher, ResultOverlay } from "./Overlays";
 import { NowBar, RoundPop, type Tab, useGo } from "./Now";
-import { WORDS, MEDIA } from "../../shared/catalog";
+import { WORDS } from "../../shared/catalog";
 
 export function PlayerApp() {
   const { game, view, status } = useGame("player");
@@ -79,6 +79,9 @@ export function PlayerApp() {
     <div className={cls("phone", wide && "wide")}>
       <ConnBanner status={status} />
       <TopBar me={me} view={view} game={game} isKing={king === me.id} onHelp={() => setHowto(true)} />
+      {view.me.toConfirm.map((c) => (
+        <ConfirmBanner key={c.missionId} item={c} view={view} game={game} />
+      ))}
       {view.me.available < 100 && <BailoutBanner view={view} game={game} />}
       {wide && <NowBar game={game} view={view} me={me} />}
       {wide ? (
@@ -224,6 +227,40 @@ function TopBar({ me, view, game, isKing, onHelp }: { me: PlayerPub; view: Clien
       </button>
       <ProfileSheet open={profile} onClose={() => setProfile(false)} me={me} game={game} />
     </header>
+  );
+}
+
+/** Someone says they played you with a secret mission: did it really happen? Silence counts as yes. */
+function ConfirmBanner({ item, view, game }: { item: MeView["toConfirm"][number]; view: ClientView; game: Game }) {
+  const [busy, setBusy] = useState(false);
+  const by = view.pub.players.find((p) => p.id === item.by);
+  const answer = async (yes: boolean) => {
+    setBusy(true);
+    try {
+      await game.act("confirmMission", { missionId: item.missionId, yes });
+      toast(yes ? "✅ אישרת. הכסף עבר" : "🙅 המשימה חוזרת אליו", "ok");
+    } catch (e) {
+      toast((e as Error).message, "err");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="confirm-ask" role="alertdialog" aria-label="משימה סודית עליך">
+      <p className="confirm-q">
+        🙋 <b>{by?.name ?? "מישהו"}</b> טוען שעבד עליך:
+      </p>
+      <p className="confirm-text">״{item.text}״</p>
+      <p className="confirm-sub">זה באמת קרה? לא עונים תוך דקה וחצי, וזה נחשב כן.</p>
+      <div className="confirm-btns">
+        <button type="button" className="btn btn-gold" disabled={busy} onClick={() => void answer(true)}>
+          כן, עבד עליי 😅
+        </button>
+        <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => void answer(false)}>
+          לא קרה
+        </button>
+      </div>
+    </div>
   );
 }
 

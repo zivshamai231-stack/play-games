@@ -2105,3 +2105,91 @@ html:has(.phone) {
   margin: 0;
   font-size: 0.85rem;
 }
+
+/* ---------- joining: how you know the star ---------- */
+
+.join-circles {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.circle-chip {
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1.5px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  background: color-mix(in srgb, var(--gold) 8%, transparent);
+  color: var(--almond);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.circle-chip.on {
+  border-color: var(--gold-hi);
+  background: var(--gold);
+  color: #1c1208;
+}
+
+.join-hint {
+  max-width: 34ch;
+  font-size: 0.9rem;
+  color: var(--almond-dim);
+}
+
+.join-spectator {
+  justify-content: center;
+}
+
+.join-go {
+  width: 100%;
+  max-width: 320px;
+}
+
+/* ---------- did it really happen? (asked of whoever got played) ---------- */
+
+.confirm-ask {
+  display: grid;
+  gap: 6px;
+  margin: 10px 14px 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--gold) 60%, transparent);
+}
+
+.confirm-q {
+  font-size: 1rem;
+}
+
+.confirm-text {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--gold-hi);
+}
+
+.confirm-sub {
+  font-size: 0.85rem;
+  color: var(--almond-dim);
+}
+
+.confirm-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.env-denied {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #9a3b18;
+}
+
+.spectator-out {
+  justify-self: center;
+  margin-top: 4px;
+}
