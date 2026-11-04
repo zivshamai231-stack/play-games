@@ -42,7 +42,7 @@ export function JoinScreen({ game, view }: { game: Game; view: ClientView }) {
     return (
       <div className="join">
         <h1 className="join-title">היי {step.who} 👋</h1>
-        <p className="join-lede">{star && !(step.payload.playerId === star.id) ? `מאיפה אתה מכיר את ${star.name}?` : "מאיזה עולם אתה מגיע?"}</p>
+        <p className="join-lede">{star && !(step.payload.playerId === star.id) ? `מאיפה אתם מכירים את ${star.name}?` : "מאיזה עולם הגעתם?"}</p>
         <div className="join-circles" role="radiogroup">
           {CIRCLES.map((c) => (
             <button key={c} type="button" role="radio" aria-checked={circle === c} className={cls("circle-chip", circle === c && "on")} onClick={() => setCircle(c)}>
@@ -50,10 +50,10 @@ export function JoinScreen({ game, view }: { game: Game; view: ClientView }) {
             </button>
           ))}
         </div>
-        <p className="join-hint">המשימות הסודיות שלך יהיו בעיקר על אנשים מעולמות אחרים. ככה מכירים.</p>
+        <p className="join-hint">המשימות הסודיות שלכם יהיו בעיקר על אנשים מעולמות אחרים. ככה כולם מכירים את כולם.</p>
         <label className="check join-spectator">
           <input type="checkbox" checked={spectator} onChange={(e) => setSpectator(e.target.checked)} />
-          <span>רק מהמר ומצביע, בלי משימות סודיות</span>
+          <span>רק להמר ולהצביע. בלי משימות סודיות</span>
         </label>
         <button type="button" className="btn btn-gold join-go" disabled={!circle || !!busy} onClick={() => void join({ ...step.payload, circle, spectator }, step.key)}>
           {busy ? "נכנס…" : "נכנסים למשחק"}

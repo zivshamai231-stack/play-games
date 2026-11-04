@@ -22,7 +22,7 @@ const AI: Record<SpotKind, (id: string) => string> = {
 };
 
 /** Drinking tasks get the shot picture, anything else the crying-in-the-rain one. */
-export const loseKind = (task: string | null): SpotKind => (task && /שוט|לגימה|בירה|שותים/.test(task) ? "shot" : "lose");
+export const loseKind = (task: string | null): SpotKind => (task && /שוט|לגימה|לוגמים|ללגום|כוסית|בירה|שותים/.test(task) ? "shot" : "lose");
 
 /** A full-screen sequence (round results, a flash) holds back the news queue until it is done. */
 export const tvBusy = { until: 0 };

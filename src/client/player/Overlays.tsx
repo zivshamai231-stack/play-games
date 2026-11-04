@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useIsPresent } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import type { ClientView, RoundPub } from "../../shared/types";
-import { cls, lsGet, lsSet } from "../lib";
+import { cls, lsGet, lsSet, sip } from "../lib";
 import { sfx } from "../sound";
 import { Money, burst, toast } from "../ui";
 import { WORDS } from "../../shared/catalog";
@@ -72,7 +72,7 @@ export function ResultOverlay({ view, meId }: { view: ClientView; meId: string }
       // after the TV counts the votes
       window.setTimeout(() => {
         if (due.losers.includes(meId)) {
-          setFlash({ kind: "drink", title: due.refunded ? "🥃 כולם שותים!" : "🗳️ נבחרת!", sub: due.lines.voted ?? "שוט!" });
+          setFlash({ kind: "drink", title: due.refunded ? `${sip().emoji} ${sip().all}!` : "🗳️ נבחרת!", sub: due.lines.voted ?? `${sip().noun}!` });
           sfx.gotcha();
           navigator.vibrate?.([120, 60, 120, 60, 300]);
         } else if (gain > 0) {
@@ -84,7 +84,7 @@ export function ResultOverlay({ view, meId }: { view: ClientView; meId: string }
       return;
     }
     if (due.refunded) {
-      setFlash({ kind: "drink", title: "🍻 אף אחד לא צדק!", sub: `ההימור חזר אליך. אבל ${due.task ?? "כולם שותים"}` });
+      setFlash({ kind: "drink", title: "🍻 אף אחד לא צדק!", sub: `ההימור חזר אליך. אבל ${due.task ?? sip().all}` });
       sfx.lose();
       return;
     }
@@ -94,12 +94,12 @@ export function ResultOverlay({ view, meId }: { view: ClientView; meId: string }
       // let the TV's drum roll land first (no cleanup: the next render already forgets this round)
       window.setTimeout(() => {
         if (due.losers.includes(meId)) {
-          setFlash({ kind: "drink", title: "🥃 שוט!", sub: due.loserReason === "slow" ? "צדקת, אבל ענית אחרון. לחיים!" : `התשובה הנכונה: ״${label}״. לחיים!` });
+          setFlash({ kind: "drink", title: `${sip().emoji} ${sip().noun}!`, sub: due.loserReason === "slow" ? "צדקת, אבל ענית אחרון. לחיים!" : `התשובה הנכונה: ״${label}״. לחיים!` });
           sfx.gotcha();
           navigator.vibrate?.([120, 60, 120, 60, 300]);
         } else if (won) {
           const fastest = delta > due.reward * (due.mult || 1);
-          setFlash({ kind: "win", amount: delta, title: fastest ? "⚡ הכי מהיר!" : "צדקת! 🧠", sub: fastest ? `צדקת והיית הראשון. תסתכל על הטלוויזיה 😎` : `התשובה: ״${label}״` });
+          setFlash({ kind: "win", amount: delta, title: fastest ? "⚡ הכי מהיר!" : "צדקת! 🧠", sub: fastest ? `צדקת והיית הראשון. הטלוויזיה מדברת עליך 😎` : `התשובה: ״${label}״` });
           sfx.win();
           burst("coins");
         }
@@ -186,7 +186,7 @@ export function FeedWatcher({ view, meId }: { view: ClientView; meId: string }) 
         }, wait);
       } else if (e.kind === "broke") {
         if (e.players.includes(meId)) {
-          setFlash({ kind: "drink", title: "💸 פשטת רגל!", sub: `המשימה שלך: ${e.data?.task ?? "תשאל את המנחה"}. אחרי שתבצע, המנחה יאשר לך חילוץ.` });
+          setFlash({ kind: "drink", title: "💸 פשטת רגל!", sub: `המשימה שלך: ${e.data?.task ?? "המנחה יגיד"}. ביצעת? המנחה מאשר לך חילוץ.` });
           sfx.sad();
           navigator.vibrate?.([300, 100, 300]);
         } else toast(e.text, "info", 6000);
@@ -205,18 +205,18 @@ export function FeedWatcher({ view, meId }: { view: ClientView; meId: string }) 
       } else if (e.kind === "king" && e.players[0] === meId) {
         // after the round's own result card, never on top of it
         whenClear(() => {
-          setFlash({ kind: "win", title: "👑 אתה המלך החדש!", sub: e.data?.line ?? e.text });
+          setFlash({ kind: "win", title: "👑 הכתר שלך!", sub: e.data?.line ?? e.text });
           sfx.fanfare();
           burst("win");
         }, 6000);
       } else if (e.kind === "streak" && e.players[0] === meId) {
         whenClear(() => {
-          setFlash({ kind: "win", amount: e.data?.amount, title: `🔥 ${e.data?.streak ?? 3} ברצף!`, sub: "הבנק מוסיף לך בונוס. תמשיך ככה" });
+          setFlash({ kind: "win", amount: e.data?.amount, title: `🔥 ${e.data?.streak ?? 3} ברצף!`, sub: "הבנק מוסיף לך בונוס. לא לעצור" });
           sfx.win();
           burst("coins");
         }, 6000);
       } else if (e.kind === "card" && e.data?.card === "drink" && e.players.includes(meId)) {
-        setFlash({ kind: "drink", title: `🃏 ${WORDS.star} החליט: אתה שותה!`, sub: e.data?.line ?? e.text });
+        setFlash({ kind: "drink", title: `🃏 קלף זהב של ${WORDS.star}: זה עליך`, sub: e.data?.line ?? e.text });
         sfx.gotcha();
         navigator.vibrate?.([120, 60, 120, 60, 300]);
       } else {

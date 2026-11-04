@@ -261,7 +261,7 @@ function Settings({ view, run }: { view: ClientView; run: Run }) {
         </label>
       </div>
       <div className="prize-fields">
-        <span className="muted">מה מקבלים בבוקר (מופיע בטלפונים ובהכרזת המנצח):</span>
+        <span className="muted">מה מקבלים בסוף הערב (מופיע בטלפונים ובהכרזת המנצח):</span>
         <label className="field">
           <span>🥇 מקום ראשון</span>
           <input value={f.prize1} onChange={text("prize1")} maxLength={120} />

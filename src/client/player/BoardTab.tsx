@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import type { ClientView } from "../../shared/types";
-import { cls, kingAndLast, ranked } from "../lib";
+import { cls, kingAndLast, ranked, sip } from "../lib";
 import { Avatar, Change, Money, Podium, Spark } from "../ui";
 import { WORDS } from "../../shared/catalog";
 
@@ -14,9 +14,9 @@ export function BoardTab({ view, meId }: { view: ClientView; meId: string }) {
       <div className="board-podium felt">
         <Podium list={list.slice(0, 3)} size="m" />
       </div>
-      <p className="board-rules">👑 המלך בוחר מי מתמודד באתגר הבא. 🍋 {WORDS.last} שותה כשהגלגל מחליט.</p>
+      <p className="board-rules">👑 המלך בוחר מי מתמודד באתגר הבא. 🍋 {WORDS.last} {sip().does} כשהגלגל מחליט.</p>
       <div className="morning felt">
-        <h3>🌅 מה מחכה בבוקר</h3>
+        <h3>🎁 מה מחכה בסוף הערב</h3>
         <p>
           <b>🥇</b> {view.pub.settings.prize1}
         </p>

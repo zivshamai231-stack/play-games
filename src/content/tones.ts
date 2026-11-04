@@ -29,6 +29,22 @@ export interface TonePack {
   soundLines: Record<string, string>;
   /** the announcer's voice direction (OpenAI TTS instructions) */
   voice: string;
+  /** what "drinking" is called on the screens, so a calm night never shows "שוט!" */
+  sip: Sip;
+}
+
+export interface Sip {
+  /** one: "שוט", "לגימה", "כוסית" */
+  noun: string;
+  /** many: "שוטים" */
+  plural: string;
+  emoji: string;
+  /** someone does it: "שותה שוט" */
+  does: string;
+  /** to do it: "לשתות שוט" */
+  act: string;
+  /** everyone: "כולם שותים" */
+  all: string;
 }
 
 /* ---------------- על אש קטנה: warm, kind, nobody gets roasted ---------------- */
@@ -114,6 +130,7 @@ const calm: TonePack = {
   },
   voice:
     "Speak natural Israeli Hebrew like a warm, friendly host at a birthday party at home: gentle, smiling, light humor, never mocking. Read exactly what is written. Never translate.",
+  sip: { noun: "כוסית", plural: "כוסיות", emoji: "🥂", does: "מרים כוסית", act: "להרים כוסית", all: "כולם מרימים כוסית" },
 };
 
 /* ---------------- על אש בינונית: cheeky, teasing, everybody's in on the joke ---------------- */
@@ -199,6 +216,7 @@ const playful: TonePack = {
   },
   voice:
     "Speak natural Israeli Hebrew like a warm, witty host at a friend's party: playful, upbeat, a little cheeky, with great comedic timing. Read exactly what is written. Never translate.",
+  sip: { noun: "לגימה", plural: "לגימות", emoji: "🍷", does: "לוגם", act: "ללגום", all: "כולם לוגמים" },
 };
 
 /* ---------------- על אש גבוהה: a roast. Slang, shots, nobody is safe ---------------- */
@@ -284,6 +302,7 @@ const spicy: TonePack = {
   },
   voice:
     "Speak natural Israeli Hebrew like a loud, cheeky party host roasting his friends: slangy, high energy, sarcastic, with great comedic timing. Read exactly what is written. Never translate.",
+  sip: { noun: "שוט", plural: "שוטים", emoji: "🥃", does: "שותה שוט", act: "לשתות שוט", all: "כולם שותים" },
 };
 
 export const TONES: Record<ToneId, TonePack> = { calm, playful, spicy };

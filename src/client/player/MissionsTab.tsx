@@ -77,7 +77,7 @@ function SpectatorCard({ game, on }: { game: Game; on: boolean }) {
     setBusy(true);
     try {
       await game.act("setSpectator", { on: !on });
-      toast(on ? "✉️ המשימות בדרך אליך" : "👀 אתה במצב צופה. מהמר ומצביע, בלי משימות", "ok");
+      toast(on ? "✉️ המשימות בדרך אליך" : "👀 מצב צופה. מהמרים ומצביעים, בלי משימות", "ok");
     } catch (e) {
       toast((e as Error).message, "err");
     } finally {
@@ -89,8 +89,8 @@ function SpectatorCard({ game, on }: { game: Game; on: boolean }) {
       <span className="idle-dice" aria-hidden="true">
         👀
       </span>
-      <h2>אתה במצב צופה</h2>
-      <p>מהמר, מצביע ותופס אחרים, בלי משימות סודיות משלך.</p>
+      <h2>מצב צופה</h2>
+      <p>מהמרים, מצביעים ותופסים אחרים. רק בלי משימות משלכם.</p>
       <button type="button" className="btn btn-gold" disabled={busy} onClick={flip}>
         בעצם, תנו לי משימות
       </button>
@@ -133,7 +133,7 @@ function Envelope({ m, game, view }: { m: Mission; game: Game; view: ClientView 
       sfx.secret();
       burst("coins");
       navigator.vibrate?.([30, 50, 30]);
-      toast(`🤫 ההתראה עלתה. עכשיו תשרוד ${view.pub.settings.catchWindow} שניות…`, "ok");
+      toast(`🤫 ההתראה עלתה. עכשיו לשרוד ${view.pub.settings.catchWindow} שניות…`, "ok");
     } catch (e) {
       toast((e as Error).message, "err");
     } finally {

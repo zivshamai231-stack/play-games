@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { ClientView, GroomCard, PlayerPub, RoundPub } from "../../shared/types";
 import { CARDS } from "../../shared/catalog";
-import { LETTERS, cls, fmt, mmss, potOf, projectedPayout, ranked, resizeImage } from "../lib";
+import { LETTERS, cls, fmt, mmss, potOf, projectedPayout, ranked, resizeImage, sip } from "../lib";
 import { type Game, useServerNow } from "../net";
 import { sfx } from "../sound";
 import { RodeoItay } from "../rodeo";
@@ -55,7 +55,7 @@ function Idle({ hasNight }: { hasNight: boolean }) {
     <div className="idle felt">
       <RodeoItay size={170} />
       <h2>אין אתגר פתוח כרגע</h2>
-      <p>{hasNight ? "כשהמנחה יפתח אתגר הוא יקפוץ כאן. בינתיים יש הימורי לילה למטה." : "כשהמנחה יפתח סיבוב, הוא יופיע כאן. בינתיים אפשר לעבוד על המשימות הסודיות."}</p>
+      <p>{hasNight ? "האתגר הבא יקפוץ כאן. בינתיים יש הימורי לילה למטה." : "הסיבוב הבא יקפוץ כאן. בינתיים, המשימות הסודיות לא יבצעו את עצמן."}</p>
     </div>
   );
 }
@@ -449,15 +449,15 @@ function QuizCard({ game, view, me, round, now, open }: { game: Game; view: Clie
           {open
             ? mine
               ? "נעול על התשובה שלך. אפשר לשנות עד שהזמן נגמר."
-              : `צודקים מקבלים ${fmt(round.reward * (round.mult || 1))}, הכי מהיר עוד ${fmt(round.bonus * (round.mult || 1))}. טועים שותים 🥃`
+              : `צודקים מקבלים ${fmt(round.reward * (round.mult || 1))}, הכי מהיר עוד ${fmt(round.bonus * (round.mult || 1))}. טועים: ${sip().noun} ${sip().emoji}`
             : !resolved
               ? "הזמן נגמר. עוד רגע התשובה."
               : mineRight
                 ? `צדקת! +${fmt(gain)}`
                 : drinking
                   ? round.loserReason === "slow"
-                    ? "ענית אחרון. שוט! 🥃"
-                    : "טעות. שוט! 🥃"
+                    ? `ענית אחרון. ${sip().noun} ${sip().emoji}`
+                    : `טעות. ${sip().noun} ${sip().emoji}`
                   : "השאלה הזאת מאחורינו."}
         </p>
       )}
@@ -518,7 +518,7 @@ function VoteCard({ game, view, me, round, now, open }: { game: Game; view: Clie
               onClick={() => vote(o.id)}
             >
               {p && <Avatar p={p} size={52} />}
-              <span className="vote-name">{self ? "אתה" : o.label}</span>
+              <span className="vote-name">{self ? "אני" : o.label}</span>
               {!open && round.bets && <b className="vote-n">{counts.get(o.id) ?? 0}</b>}
             </button>
           );
@@ -528,13 +528,13 @@ function VoteCard({ game, view, me, round, now, open }: { game: Game; view: Clie
         {open
           ? mine
             ? "הקול שלך נקלט 🤫 אפשר לשנות עד שהזמן נגמר."
-            : `מי שמקבל הכי הרבה קולות שותה. הצבעת כמו הרוב? ${fmt(round.reward * (round.mult || 1))} ${view.pub.settings.currency}.`
+            : `מי שמקבל הכי הרבה קולות ${sip().does}. הצבעת כמו הרוב? ${fmt(round.reward * (round.mult || 1))} ${view.pub.settings.currency}.`
           : !resolved
             ? "סופרים קולות…"
             : round.refunded
-              ? "אף אחד לא הצביע. כולם שותים 🥃"
+              ? `אף אחד לא הצביע. ${sip().all} ${sip().emoji}`
               : chosen
-                ? "נבחרת! שוט 🥃"
+                ? `נבחרת. ${sip().noun} ${sip().emoji}`
                 : gain > 0
                   ? `הצבעת כמו הרוב! +${fmt(gain)}`
                   : mine
@@ -666,7 +666,7 @@ function NightSummary({ view, me }: { view: ClientView; me: PlayerPub }) {
     ["🕵️", "תפסת", `${st.catches}`],
     ["😵", "נתפסת", `${st.timesCaught}`],
     ["🧠", "תשובות נכונות", `${st.quizRight}`],
-    ["🥃", "שוטים מהמשחק", `${st.shots}`],
+    [sip().emoji, `${sip().plural} מהמשחק`, `${st.shots}`],
   ];
   return (
     <div className="summary felt">
@@ -723,7 +723,7 @@ function GroomCards({ game, view, me, open }: { game: Game; view: ClientView; me
       await game.act("groomCard", { card, target });
       sfx.fanfare();
       burst("win");
-      toast("🃏 הקלף נשלף! תסתכל על הטלוויזיה", "ok");
+      toast("🃏 הקלף נשלף. כולם מסתכלים על הטלוויזיה", "ok");
       setPicking(false);
     } catch (e) {
       toast((e as Error).message, "err");
@@ -754,7 +754,7 @@ function GroomCards({ game, view, me, open }: { game: Game; view: ClientView; me
         ))}
       </div>
       {picking && (
-        <div className="player-chips gc-pick" role="group" aria-label="מי שותה?">
+        <div className="player-chips gc-pick" role="group" aria-label="על מי?">
           {view.pub.players
             .filter((p) => p.id !== me.id)
             .map((p) => (

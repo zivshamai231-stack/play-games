@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import type { MyBet, PlayerPub, RoundPub } from "../shared/types";
-import { WORDS } from "../shared/catalog";
+import { WORDS, sipFor } from "../shared/catalog";
+
+/* The host's tone, set on every render from the latest view, so the screens call drinking what the tone calls it. */
+let toneNow = "playful";
+export const setTone = (t: string | undefined) => {
+  if (t) toneNow = t;
+};
+/** "שוט" / "לגימה" / "כוסית" and friends, for tonight's tone */
+export const sip = () => sipFor(toneNow);
 
 export const fmt = (n: number) => Math.round(n).toLocaleString("en-US");
 export const signed = (n: number) => (n > 0 ? "+" : n < 0 ? "−" : "") + fmt(Math.abs(n));

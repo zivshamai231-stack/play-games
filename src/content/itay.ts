@@ -422,6 +422,7 @@ const content: EventContent = {
   ],
   lateWheel: ["🌊 המקום האחרון קופץ לבריכה!", "last"],
     voice: "Speak natural Israeli Hebrew like a loud, cocky Israeli street guy (an ars) hosting a wild bachelor party: rough, slangy, high energy, sarcastic, with great comedic timing. Read exactly what is written, swear words included. Never translate or soften anything.",
+    sip: { noun: "שוט", plural: "שוטים", emoji: "🥃", does: "שותה", act: "לשתות שוט", all: "כולם שותים" },
     soundLines: Object.fromEntries(SOUNDS.filter((x) => x.line).map((x) => [x.id, x.line!])),
   },
   rules: [

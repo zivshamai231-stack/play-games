@@ -1,5 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { ClientView } from "../shared/types";
+import { setTone } from "./lib";
 
 export type Role = "player" | "tv" | "admin";
 export type ConnStatus = "connecting" | "online" | "offline";
@@ -291,6 +292,7 @@ export function useGame(role: Role) {
   const snap = useSyncExternalStore(game.subscribe, game.getSnapshot);
   // the evening's colors: every screen follows the host's choice
   const theme = snap.view?.pub.settings.theme;
+  setTone(snap.view?.pub.settings.tone);
   useEffect(() => {
     if (theme) document.documentElement.dataset.theme = theme;
   }, [theme]);

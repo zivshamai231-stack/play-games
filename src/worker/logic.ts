@@ -722,7 +722,7 @@ const PLAYER: Record<string, Handler> = {
     if (r.kind !== "night" && s.activeRoundId !== r.id) fail("הסיבוב הזה כבר לא פעיל");
     if (r.status === "open" && r.openedAt && c.now < r.openedAt) fail("רגע, עוד מגרילים 🎰");
     if (!bettingOpen(r, c.now)) fail(r.kind === "quiz" ? "הזמן לענות נגמר" : "ההימורים כבר נסגרו");
-    if (r.noBet.includes(pl.id)) fail(r.kind === "quiz" ? "על השאלה הזאת אתה לא עונה 😉" : "משתתפי האתגר לא מהמרים בסיבוב הזה");
+    if (r.noBet.includes(pl.id)) fail(r.kind === "quiz" ? "את השאלה הזאת עונים בקול מול כולם 😉" : "משתתפי האתגר לא מהמרים בסיבוב הזה");
     const opt = r.options.find((o) => o.id === c.p.optionId) ?? fail("האפשרות הזאת לא קיימת");
     if (r.kind === "quiz" || r.kind === "vote" || r.kind === "photo") {
       if (r.kind === "photo" && r.phase !== "vote") fail("עוד אוספים תמונות. ההצבעה תכף 📸");
@@ -780,7 +780,7 @@ const PLAYER: Record<string, Handler> = {
     if (m.assignedTo !== pl.id) fail("המשימה הזאת לא שלך");
     if (m.status === "burned") fail("המשימה נשרפה. מישהו תפס אותך 🔥");
     if (m.status === "done" || m.status === "pending" || m.status === "confirm") fail("המשימה כבר סומנה כבוצעה");
-    if (s.feed.some((e) => e.kind === "mission" && e.ref === m.id && c.now - e.at < 30_000)) fail("רק עכשיו ביטלת אותה. נסה שוב עוד חצי דקה");
+    if (s.feed.some((e) => e.kind === "mission" && e.ref === m.id && c.now - e.at < 30_000)) fail("רק עכשיו ביטלת אותה. אפשר שוב עוד חצי דקה");
     Object.assign(m, { status: "pending", claimedAt: c.now, doneAt: null });
     const win = s.settings.catchWindow;
     m.deniedBy = null;
@@ -856,7 +856,7 @@ const PLAYER: Record<string, Handler> = {
       pushFeed(s, c.now, "card", `💥 ${line}`, [pl.id], r.id, { line, card });
     } else {
       const t = findPlayer(s, c.p.target);
-      if (t.id === pl.id) fail("בחר מישהו אחר 😉");
+      if (t.id === pl.id) fail("בחרו מישהו אחר 😉");
       const line = fill(copyFor(s).lines.drink, t.name);
       pushFeed(s, c.now, "card", `🥃 ${line}`, [t.id], null, { line, card });
     }
@@ -865,7 +865,7 @@ const PLAYER: Record<string, Handler> = {
 
   extraMission(s, c) {
     const pl = me(s, c);
-    if (pl.spectator) fail("אתה במצב צופה. אפשר לעבור למשימות בלשונית המשימות");
+    if (pl.spectator) fail("במצב צופה אין משימות. יוצאים ממנו בלשונית המשימות");
     const hand = handOf(s, pl.id);
     if (hand.some((m) => m.status === "open" || m.status === "pending" || m.status === "confirm")) fail("קודם מסיימים את המשימות הפתוחות");
     if (!dealTo(s, pl, hand.length + 1)) fail("נגמרו המשימות במאגר. אתם אגדה");
@@ -915,7 +915,7 @@ const PLAYER: Record<string, Handler> = {
     const to = findPlayer(s, c.p.to);
     const it = SHOP.find((x) => x.id === c.p.item) ?? fail("המתנה הזאת לא קיימת");
     if (s.ledger.some((e) => e.kind === "gift" && e.playerId === pl.id && c.now - e.at < 5000)) fail("רגע, לאט עם המתנות 🙂");
-    if (available(s, pl.id) - it.price < BROKE_AT) fail(`אחרי המתנה לא יישאר לך כמעט כלום. תשאיר לעצמך לפחות ${BROKE_AT} 😉`);
+    if (available(s, pl.id) - it.price < BROKE_AT) fail(`אחרי המתנה לא יישאר לך כמעט כלום. צריך להשאיר לעצמך לפחות ${BROKE_AT} 😉`);
     if (it.slot === "hat") to.hat = it.emoji;
     else to.item = it.emoji;
     s.ledger.push({ id: newId(), playerId: pl.id, delta: -it.price, kind: "gift", ref: to.id, note: `${it.emoji} ${it.name} ל${to.name}`, at: c.now });

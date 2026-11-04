@@ -28,7 +28,7 @@ function hintFor(view: ClientView, me: PlayerPub, now: number): Hint {
       return r.options.some((o) => o.playerId === me.id)
         ? { icon: "✅", text: `התמונה שלך בפנים. מחכים להצבעה${t}`, tone: "calm", tab: "bet" }
         : { icon: "📸", text: `עכשיו: ${WORDS.contestNow}${t}`, tone: "go", tab: "bet" };
-    if (r.noBet.includes(me.id)) return { icon: "💪", text: r.kind === "quiz" ? "על השאלה הזאת עונים בקול מול כולם" : "אתה בתוך האתגר. בהצלחה!", tone: "calm", tab: "bet" };
+    if (r.noBet.includes(me.id)) return { icon: "💪", text: r.kind === "quiz" ? "על השאלה הזאת עונים בקול מול כולם" : "תורך באתגר. בהצלחה", tone: "calm", tab: "bet" };
     if (!mine.bets[r.id]) {
       if (r.kind === "quiz") return { icon: "❓", text: `עכשיו: לענות מהר!${t}`, tone: "go", tab: "bet" };
       if (r.kind === "vote") return { icon: "🗳️", text: `עכשיו: להצביע!${t}`, tone: "go", tab: "bet" };
@@ -120,7 +120,7 @@ export function RoundPop({ game, view, me, go }: { game: Game; view: ClientView;
   const title = !r
     ? ""
     : inIt
-      ? "💪 אתה באתגר!"
+      ? "💪 תורך באתגר!"
       : photo
         ? r.phase === "collect"
           ? "📸 תחרות תמונות!"

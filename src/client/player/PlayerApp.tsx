@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { ClientView, MeView, PlayerPub } from "../../shared/types";
-import { cls, fmt, keepAwake, kingAndLast, lsGet, lsSet, resizeImage, useMedia } from "../lib";
+import { cls, fmt, keepAwake, sip, kingAndLast, lsGet, lsSet, resizeImage, useMedia } from "../lib";
 import { creds, useGame, type Game } from "../net";
 import { setMuted, sfx, useMuted } from "../sound";
 import { Avatar, Coin, ConnBanner, Led, Marquee, Sheet, ask, toast } from "../ui";
@@ -12,7 +12,7 @@ import { MissionsTab } from "./MissionsTab";
 import { RodeoPhoto, useIntro } from "../rodeo";
 import { FeedWatcher, MissionWatcher, ResultOverlay } from "./Overlays";
 import { NowBar, RoundPop, type Tab, useGo } from "./Now";
-import { WORDS } from "../../shared/catalog";
+import { CARDS, WORDS } from "../../shared/catalog";
 
 export function PlayerApp() {
   const { game, view, status } = useGame("player");
@@ -146,7 +146,7 @@ function HowTo({ view, me, open, onClose }: { view: ClientView; me: PlayerPub; o
     <Sheet open={open} onClose={onClose} title="איך משחקים">
       <ul className="howto">
         <li>
-          <b>💰 יש לך {fmt(startBalance)} {currency}.</b> מי שמסיים הכי עשיר מנצח, ובבוקר: {prize1}.
+          <b>💰 יש לכם {fmt(startBalance)} {currency}.</b> מי שמסיים הכי עשיר מנצח. הפרס: {prize1}.
         </li>
         <li>
           <b>👇 לא בטוחים מה עושים?</b> הפס הצבעוני למטה, מעל הלשוניות, תמיד אומר מה עכשיו. לוחצים עליו, והוא לוקח לשם.
@@ -155,10 +155,10 @@ function HowTo({ view, me, open, onClose }: { view: ClientView; me: PlayerPub; o
           <b>📈 הבורסה:</b> המנחה מסובב את גלגל הבלגן, ויוצא אתגר, שאלה או הצבעה. מהמרים, עונים או מצביעים כאן. אף אחד לא רואה מה בחרתם עד שהזמן נגמר.
         </li>
         <li>
-          <b>❓ שאלות ידע:</b> צודקים מקבלים {currency}. טועים, או עונים אחרונים, שותים שוט על המסך הגדול.
+          <b>❓ שאלות ידע:</b> צודקים מקבלים {currency}. מי שטועה, או עונה אחרון, {sip().does} מול כולם.
         </li>
         <li>
-          <b>🗳️ הצבעות:</b> ״מי הכי סביר ש...״. מי שמקבל הכי הרבה קולות שותה, ומי שהצביע כמו הרוב מרוויח.
+          <b>🗳️ הצבעות:</b> ״מי הכי סביר ש...״. מי שמקבל הכי הרבה קולות {sip().does}, ומי שהצביע כמו הרוב מרוויח.
         </li>
         <li>
           <b>🤫 משימות סודיות:</b> יש לך 3. ביצעת? ״ביצעתי״, והטלוויזיה מכריזה בלי שם. לא תפסו אותך תוך {catchWindow} שניות? מי שעבדת עליו משלם לך. משימה בלתי אפשרית? מחליפים ב־50.
@@ -174,7 +174,7 @@ function HowTo({ view, me, open, onClose }: { view: ClientView; me: PlayerPub; o
         </li>
         {me.isGroom && (
           <li>
-            <b>🃏 רק לך, {WORDS.star}:</b> 3 קלפי זהב בבורסה: וטו, הכפלה ו״אתה שותה!״. כל אחד עובד פעם אחת בלילה.
+            <b>🃏 רק לך, {WORDS.star}:</b> 3 קלפי זהב בבורסה: {CARDS.veto.name}, {CARDS.double.name} ו״{CARDS.drink.name}״. כל אחד עובד פעם אחת בלילה.
           </li>
         )}
         <li>
@@ -184,7 +184,7 @@ function HowTo({ view, me, open, onClose }: { view: ClientView; me: PlayerPub; o
           <b>📲 כמו אפליקציה:</b> שיתוף ← ״הוספה למסך הבית״, והמשחק נפתח על כל המסך, בלי שורת הכתובת.
         </li>
         <li>
-          <b>🍋 המקום האחרון בבוקר:</b> {prizeLast}.
+          <b>🍋 ומי שמסיים אחרון:</b> {prizeLast}.
         </li>
       </ul>
       <div className="sheet-cta">
@@ -248,7 +248,7 @@ function ConfirmBanner({ item, view, game }: { item: MeView["toConfirm"][number]
   return (
     <div className="confirm-ask" role="alertdialog" aria-label="משימה סודית עליך">
       <p className="confirm-q">
-        🙋 <b>{by?.name ?? "מישהו"}</b> טוען שביצע עליך משימה סודית. המשימה שלו:
+        🙋 <b>{by?.name ?? "מישהו"}</b> סימן שביצע עליך משימה סודית:
       </p>
       <p className="confirm-text">״{item.text}״</p>
       <p className="confirm-sub">
@@ -275,7 +275,7 @@ function BailoutBanner({ view, game }: { view: ClientView; game: Game }) {
     <div className="bailout" role="status">
       <span>
         {pending && bail?.dare
-          ? `💸 פשטת רגל! המשימה שלך: ${bail.dare}. אחרי שתבצע, המנחה יאשר לך חילוץ של ${fmt(bailoutAmount)}.`
+          ? `💸 פשטת רגל. המשימה שלך: ${bail.dare}. ביצעת? המנחה מאשר לך חילוץ של ${fmt(bailoutAmount)}.`
           : pending
             ? "🆘 בקשת החילוץ אצל המנחה. תתכוננו לעונש קטן…"
             : `🆘 נגמרו ה${currency}? אפשר לבקש חילוץ ממשלתי של ${fmt(bailoutAmount)}, בתמורה לעונש קטן.`}

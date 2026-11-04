@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Bet, ClientView, PlayerPub, RoundKind, RoundOption, RoundPub, RoundRec, RoundStatus } from "../../shared/types";
 import { GAMES } from "../../shared/catalog";
-import { LETTERS, cls, fmt, fmtX, mmss, multiplier, potOf, resizeImage } from "../lib";
+import { LETTERS, cls, fmt, fmtX, mmss, multiplier, potOf, resizeImage, sip } from "../lib";
 import { type Game, useServerNow } from "../net";
 import { Avatar, Money, Sheet, ask, toast } from "../ui";
 import { type Run, WheelButtons } from "./AdminApp";
@@ -65,7 +65,7 @@ export function RoundsTab({ game, view, run }: { game: Game; view: ClientView; r
                   {r.title}
                 </b>
                 <small>
-                  {r.kind === "quiz" ? quizLine(r) : r.kind === "vote" ? "כולם מצביעים. מי שנבחר שותה, מי שהצביע כמו הרוב מרוויח" : r.options.map((o) => o.label).join(" / ")}
+                  {r.kind === "quiz" ? quizLine(r) : r.kind === "vote" ? `כולם מצביעים. מי שנבחר ${sip().does}, מי שהצביע כמו הרוב מרוויח` : r.options.map((o) => o.label).join(" / ")}
                 </small>
               </div>
               <span className={cls("status-tag", r.status)}>{STATUS[r.status]}</span>
@@ -439,7 +439,7 @@ function VoteForm({ value, game, onDone }: { value: RoundRec | null; game: Game;
         <span>כמה שניות להצביע</span>
         <input type="number" inputMode="numeric" min={10} max={300} value={seconds} onChange={(e) => setSeconds(Number(e.target.value))} />
       </label>
-      <p className="muted">כל השחקנים הם האפשרויות. מי שמקבל הכי הרבה קולות שותה, ומי שהצביע כמו הרוב מקבל 100.</p>
+      <p className="muted">כל השחקנים הם האפשרויות. מי שמקבל הכי הרבה קולות {sip().does}, ומי שהצביע כמו הרוב מקבל 100.</p>
       <button type="button" className="btn btn-gold" disabled={busy || title.trim().length < 4} onClick={save}>
         שמירה
       </button>
@@ -873,7 +873,7 @@ function LiveQuiz({ game, view, run }: { game: Game; view: ClientView; run: Run 
         <div className="quiz-outcome">
           <p>🧠 צדקו: {rightIds.length ? names(rightIds) : "אף אחד"}</p>
           <p>
-            🥃 שותים: {r.losers.length ? names(r.losers) : "אף אחד"}
+            {sip().emoji} {sip().all.replace(/^כולם /, "")}: {r.losers.length ? names(r.losers) : "אף אחד"}
             {r.loserReason === "slow" && " (כולם צדקו, הוא ענה אחרון)"}
           </p>
         </div>

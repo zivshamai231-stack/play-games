@@ -1,5 +1,5 @@
 import type { ClientView, PlayerStats } from "../shared/types";
-import { fmt, ranked } from "./lib";
+import { fmt, ranked, sip } from "./lib";
 
 export type AwardStep =
   | { kind: "title" }
@@ -26,7 +26,7 @@ export function awardSteps(view: ClientView): AwardStep[] {
   award("🎰", "המכה של הלילה", best((s) => s.bestWin), (v) => `+${fmt(v)} בהימור אחד`);
   award("🕳️", "הבור הכי עמוק", best((s) => s.worstLoss, -1), (v) => `−${fmt(Math.abs(v))} בהימור אחד`);
   award("🧠", "גאון הלילה", best((s) => s.quizRight), (v) => (v === 1 ? "תשובה נכונה אחת בשאלות הידע" : `${v} תשובות נכונות בשאלות הידע`));
-  award("🥃", "אלוף השוטים", best((s) => s.shots), (v) => (v === 1 ? "שוט אחד על חשבון הבורסה" : `${v} שוטים על חשבון הבורסה`));
+  award(sip().emoji, `אלוף ה${sip().plural}`, best((s) => s.shots), (v) => (v === 1 ? `${sip().noun} ${sip().plural.endsWith("ים") ? "אחד" : "אחת"} על חשבון הבורסה` : `${v} ${sip().plural} על חשבון הבורסה`));
   award("🕵️", "הבלש", best((s) => s.catches), (v) => `תפס ${v === 1 ? "סוכן אחד" : `${v} סוכנים`} על חם`);
   award("🤡", "הפרנואיד", best((s) => s.falseAccusations), (v) => `${v === 1 ? "האשמת שווא אחת" : `${v} האשמות שווא`}`);
   award("🆘", "תלוי בבנק", best((s) => s.bailouts), (v) => `${v === 1 ? "חילוץ אחד" : `${v} חילוצים`} מהבנק המרכזי`);

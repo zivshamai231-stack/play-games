@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { type ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ClientView, FeedEvent, PlayerPub, TvMode, WheelSpin } from "../../shared/types";
-import { cls, keepAwake } from "../lib";
+import { cls, keepAwake, sip } from "../lib";
 import { RodeoPhoto, useIntro } from "../rodeo";
 import { type Game, useGame, useServerNow } from "../net";
 import { prefetchLine, setMuted, sfx, silence, speak, unlockAudio } from "../sound";
@@ -224,7 +224,6 @@ const NEWS_TAG: Record<string, string> = {
   miss: "פספוס",
   bailout: "חילוץ",
   result: "הוכרע",
-  shot: "שוט!",
   broke: "פשט רגל",
   gift: "מתנה",
   king: "מלך חדש",
@@ -245,7 +244,7 @@ function spotFor(e: FeedEvent, people: PlayerPub[]): Parameters<typeof Spotlight
     case "streak":
       return { kind: "fast", title: `🔥 ${e.data?.streak ?? 3} ברצף!`, people: one, line, amount: e.data?.amount };
     case "card":
-      if (e.data?.card === "drink") return { kind: "shot", title: "🃏 קלף זהב: אתה שותה!", people: one, line, task: "לשתות שוט 🥃" };
+      if (e.data?.card === "drink") return { kind: "shot", title: "🃏 קלף זהב: זה עליך!", people: one, line, task: `${sip().act} ${sip().emoji}` };
       if (e.data?.card === "veto") return { kind: "mission", title: `🛑 וטו של ${WORDS.star}!`, people: one, line };
       return { kind: "win", title: `💥 ${WORDS.star} הכפיל!`, people: one, line };
     default:
@@ -351,7 +350,7 @@ function NewsBanner({ feed, players, skipShots, offset }: { feed: FeedEvent[]; p
           exit={{ y: -160 }}
           transition={{ type: "spring", stiffness: 220, damping: 24 }}
         >
-          <span className="news-tag">{NEWS_TAG[current.kind] ?? "עדכון"}</span>
+          <span className="news-tag">{NEWS_TAG[current.kind] ?? (current.kind === "shot" ? `${sip().noun}!` : "עדכון")}</span>
           <span className="news-text">{current.text}</span>
           {people.length > 0 && people.length <= 4 && (
             <span className="news-faces">

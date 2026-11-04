@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ClientView, PlayerPub, PublicBet, RoundPub } from "../../shared/types";
 import { type AwardStep, awardSteps } from "../awards";
 import { RULES } from "../../shared/catalog";
-import { LETTERS, cls, fmt, fmtX, kingAndLast, mmss, multiplier, photoOf, potOf, ranked, signed } from "../lib";
+import { LETTERS, cls, fmt, fmtX, kingAndLast, mmss, multiplier, photoOf, potOf, ranked, signed, sip } from "../lib";
 import { type Game, useServerNow } from "../net";
 import { QR } from "../qr";
 import { hush, prefetchLine, sfx, speak } from "../sound";
@@ -339,7 +339,7 @@ export function RoundScreen({ view, game }: { view: ClientView; game: Game }) {
             people={[champ]}
             img={(p) => `/photos/ai/champ/${r.game ?? "champ"}/${p.id}.jpg`}
             line={r.lines.duel}
-            task={r.lines.duelLoser ? `${r.lines.duelLoser}: לשתות! 🍺` : undefined}
+            task={r.lines.duelLoser ? `${r.lines.duelLoser}: ${sip().act} ${sip().emoji}` : undefined}
           />
         )}
         {phase === "win" && winners.length > 0 && (
@@ -523,7 +523,7 @@ export function QuizScreen({ view, game }: { view: ClientView; game: Game }) {
             <Led value={r.reward * (r.mult || 1)} />
             <Coin size={34} />
           </span>
-          <span className="tv-pot-note">הכי מהיר עוד {fmt(r.bonus * (r.mult || 1))} · טועים שותים 🥃</span>
+          <span className="tv-pot-note">הכי מהיר עוד {fmt(r.bonus * (r.mult || 1))} · טועים: {sip().noun} {sip().emoji}</span>
         </div>
         <RoundClock r={r} open={open} now={now} suspense={phase === "suspense"} />
       </header>
@@ -609,7 +609,7 @@ export function QuizScreen({ view, game }: { view: ClientView; game: Game }) {
               )}
             </div>
             <div className="results-col down">
-              <span className="results-label">שותים 🥃</span>
+              <span className="results-label">{sip().all.replace(/^כולם /, "")} {sip().emoji}</span>
               {r.losers.length ? (
                 r.losers.map((id) =>
                   people[id] ? (
@@ -632,10 +632,10 @@ export function QuizScreen({ view, game }: { view: ClientView; game: Game }) {
           <Spotlight key="fast" kind="fast" title="⚡ הכי מהיר!" people={[people[fastest.playerId]]} line={r.lines.fast} sub={r.lines.kings} amount={fastest.delta} />
         )}
         {phase === "slow" && r.losers[0] && people[r.losers[0]] && (
-          <Spotlight key="slow" kind="slow" title="🐢 הכי איטי!" people={[people[r.losers[0]]]} line={r.lines.slow} task="לשתות שוט 🥃" />
+          <Spotlight key="slow" kind="slow" title="🐢 הכי איטי!" people={[people[r.losers[0]]]} line={r.lines.slow} task={`${sip().act} ${sip().emoji}`} />
         )}
         {phase === "shot" && (
-          <Spotlight key="shot" kind="shot" title="🥃 שוט!" people={r.losers.map((id) => people[id]).filter((p): p is PlayerPub => !!p)} line={r.lines.shot ?? "טעיתם. לשתות!"} />
+          <Spotlight key="shot" kind="shot" title={`${sip().emoji} ${sip().noun}!`} people={r.losers.map((id) => people[id]).filter((p): p is PlayerPub => !!p)} line={r.lines.shot ?? `טעיתם. ${sip().act}`} />
         )}
       </AnimatePresence>
     </div>
@@ -718,7 +718,7 @@ export function VoteScreen({ view, game }: { view: ClientView; game: Game }) {
             <Led value={pay} />
             <Coin size={34} />
           </span>
-          <span className="tv-pot-note">מי שמקבל הכי הרבה קולות שותה 🥃</span>
+          <span className="tv-pot-note">מי שמקבל הכי הרבה קולות {sip().does} {sip().emoji}</span>
         </div>
         <RoundClock r={r} open={open} now={now} suspense={phase === "suspense"} />
       </header>
@@ -797,11 +797,11 @@ export function VoteScreen({ view, game }: { view: ClientView; game: Game }) {
           <Spotlight
             key="voted"
             kind="shot"
-            title={r.refunded ? "🥃 כולם שותים!" : chosen.length > 1 ? "🗳️ תיקו!" : "🗳️ נבחר!"}
+            title={r.refunded ? `${sip().emoji} ${sip().all}!` : chosen.length > 1 ? "🗳️ תיקו!" : "🗳️ נבחר!"}
             people={chosen}
             line={r.lines.voted}
             sub={r.refunded ? undefined : r.title}
-            task="לשתות שוט 🥃"
+            task={`${sip().act} ${sip().emoji}`}
           />
         )}
       </AnimatePresence>
@@ -1215,7 +1215,7 @@ function AwardView({ step, people, view }: { step: AwardStep; people: Record<str
       <div className="award-title">
         <Marquee size="l" lights />
         <h1>🏆 {WORDS.awardsTitle}</h1>
-        <p>הרגע שכולם חיכו לו. מי עבד על מי, מי הימר נכון, ומי שותה.</p>
+        <p>הרגע שכולם חיכו לו. מי עבד על מי, מי הימר נכון, ומי מסיים אחרון.</p>
       </div>
     );
   if (step.kind === "award")
@@ -1229,7 +1229,7 @@ function AwardView({ step, people, view }: { step: AwardStep; people: Record<str
           {step.ids.map((id, i) =>
             people[id] ? (
               <motion.span key={id} className="award-person" initial={{ scale: 0, rotate: -8 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 1 + i * 0.2, type: "spring", stiffness: 220, damping: 14 }}>
-                {step.emoji === "🥃" ? <FunnyFace p={people[id]} size={220} /> : <Avatar p={people[id]} size={220} />}
+                {step.emoji === sip().emoji ? <FunnyFace p={people[id]} size={220} /> : <Avatar p={people[id]} size={220} />}
                 <b>{people[id].name}</b>
               </motion.span>
             ) : null,
@@ -1266,7 +1266,7 @@ function AwardView({ step, people, view }: { step: AwardStep; people: Record<str
         </span>
       )}
       <p className="award-desc">מקום אחרון. עכשיו מסובבים את גלגל העונשים.</p>
-      <p className="award-morning">ובבוקר: {view.pub.settings.prizeLast}</p>
+      <p className="award-morning">והפרס: {view.pub.settings.prizeLast}</p>
     </div>
   );
 }
