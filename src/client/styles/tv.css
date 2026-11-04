@@ -142,10 +142,26 @@ html.is-tv body {
     0 0 0 5px var(--shell);
 }
 
+.cert-photo {
+  position: relative;
+}
+
 .cert-photo img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* no photo of the star yet: his initial, big */
+.cert-initial {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-family: var(--display);
+  font-size: 180px;
+  color: #c9922f;
 }
 
 .cert-name {

@@ -70,7 +70,20 @@ export function Lobby({ view }: { view: ClientView }) {
         <div className="cert-inner">
           <div className="cert-kicker">תעודת מניה רגילה</div>
           <div className="cert-photo">
-            {photo && <motion.img key={photo} src={photo} alt="" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2 }} />}
+            <span className="cert-initial" aria-hidden="true">
+              {groom?.name.slice(0, 1) ?? "★"}
+            </span>
+            {photo && (
+              <motion.img
+                key={photo}
+                src={photo}
+                alt=""
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1.2 }}
+                onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
+              />
+            )}
           </div>
           <div className="cert-name">{WORDS.certCompany.replace("{n}", groom?.name ?? WORDS.star)}</div>
           <dl className="cert-rows">

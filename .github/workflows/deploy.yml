@@ -5,6 +5,14 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      event:
+        description: "Which party to put online (a file in src/content, without .ts)"
+        required: true
+        default: birthday-demo
+      admin_key:
+        description: "The host's code for this party (first deploy only; leave empty to keep the current one)"
+        required: false
 
 jobs:
   check:
@@ -19,11 +27,12 @@ jobs:
       - run: npm run typecheck
       - run: npx vite build
 
-  # Deploys main to Cloudflare, only where the repository has the two secrets
-  # (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID). Forks without them just skip it.
+  # Puts one party online, when started by hand (Actions → Check and deploy → Run workflow).
+  # Each party gets its own address: party-<event>.<account>.workers.dev
+  # Needs two repository secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID.
   deploy:
     needs: check
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -41,5 +50,8 @@ jobs:
           cache: npm
       - if: env.CLOUDFLARE_API_TOKEN != ''
         run: npm ci
+      - name: Keep the host code out of the logs
+        if: env.CLOUDFLARE_API_TOKEN != '' && inputs.admin_key != ''
+        run: echo "::add-mask::${{ inputs.admin_key }}"
       - if: env.CLOUDFLARE_API_TOKEN != ''
-        run: npx vite build && npx wrangler deploy
+        run: bash scripts/deploy-event.sh "${{ inputs.event }}" "${{ inputs.admin_key }}"
