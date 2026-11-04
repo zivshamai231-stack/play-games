@@ -34,6 +34,8 @@ jobs:
     needs: check
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    # a deploy takes about a minute; anything that waits longer is stuck on a question
+    timeout-minutes: 8
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
