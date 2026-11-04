@@ -94,7 +94,7 @@ function interleave(): RoundRec[] {
 }
 
 export function seedState(now: number): GameState {
-  const players: PlayerRec[] = EVENT.players.map(([id, name, ticker, star, circle]) => ({
+  const players: PlayerRec[] = EVENT.players.map(([id, name, ticker, star, circle, story]) => ({
     id,
     name,
     ticker,
@@ -105,6 +105,7 @@ export function seedState(now: number): GameState {
     hat: null,
     item: null,
     circle: circle ?? null,
+    story: story ?? null,
     spectator: false,
   }));
   const missions: Mission[] = EVENT.missions.map(([template, reward, audience]) => ({

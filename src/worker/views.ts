@@ -135,6 +135,7 @@ export function buildPublic(s: GameState, now: number, online: Set<ID>): PublicV
       last: last.get(p.id) ?? 0,
       hat: p.hat,
       circle: p.circle,
+      story: p.story,
       spectator: p.spectator,
       item: p.item,
     };

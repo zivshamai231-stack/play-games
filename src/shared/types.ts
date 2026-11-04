@@ -6,7 +6,7 @@ export type MissionStatus = "open" | "pending" | "confirm" | "done" | "burned";
 export type RoundStatus = "draft" | "open" | "closed" | "resolved";
 export type RoundKind = "challenge" | "night" | "quiz" | "vote" | "photo";
 export type TvMode = "lobby" | "round" | "board" | "night" | "missions" | "awards" | "winner" | "rules";
-export type FeedKind = "mission" | "reveal" | "caught" | "miss" | "bailout" | "wheel" | "result" | "shot" | "broke" | "gift" | "spin" | "king" | "streak" | "card" | "rename";
+export type FeedKind = "mission" | "reveal" | "caught" | "miss" | "bailout" | "wheel" | "result" | "shot" | "broke" | "gift" | "spin" | "king" | "streak" | "card" | "rename" | "hello";
 /** the groom's one-time golden cards */
 export type GroomCard = "veto" | "double" | "drink";
 export type TargetSlot = "G" | "X" | "Y";
@@ -53,6 +53,8 @@ export interface PlayerRec {
   item: string | null;
   /** how they know the star (family, army, work...): missions pair people from different circles */
   circle: string | null;
+  /** how they met the star, in one line: the TV shows it when they walk in */
+  story: string | null;
   /** plays along without secret missions */
   spectator: boolean;
 }
@@ -216,7 +218,7 @@ export interface FeedEvent {
   players: ID[];
   ref: ID | null;
   /** for the big TV moments: the line on its own, the task, the almonds, how long to catch */
-  data?: { line?: string; task?: string; amount?: number; until?: number; mission?: ID; surprise?: string; card?: GroomCard; streak?: number };
+  data?: { line?: string; task?: string; amount?: number; until?: number; mission?: ID; surprise?: string; card?: GroomCard; streak?: number; circle?: string | null; mates?: ID[] };
 }
 
 export interface WheelSpin {
@@ -278,6 +280,7 @@ export interface PlayerPub {
   hat: string | null;
   item: string | null;
   circle: string | null;
+  story: string | null;
   spectator: boolean;
 }
 

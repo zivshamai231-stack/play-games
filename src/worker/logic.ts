@@ -66,6 +66,17 @@ function pushFeed(s: GameState, now: number, kind: FeedKind, text: string, playe
   if (s.feed.length > 40) s.feed = s.feed.slice(-40);
 }
 
+/** " מהצבא", " מהחברים של מאיה", or nothing for "אחר" and no circle */
+const fromCircle = (c: string | null | undefined) => (!c || c === "אחר" ? "" : c.startsWith("ה") ? ` מ${c}` : ` מה${c}`);
+
+/** A guest walks in: the TV introduces them once, with who else is here from the same circle. */
+function hello(s: GameState, pl: PlayerRec, now: number) {
+  if (s.feed.some((e) => e.kind === "hello" && e.players[0] === pl.id)) return;
+  const line = sample(copyFor(s).lines.hello).replaceAll("{n}", pl.name).replaceAll("{t}", fromCircle(pl.circle));
+  const mates = pl.circle ? s.players.filter((x) => x.id !== pl.id && x.token && !x.isGroom && x.circle === pl.circle).map((x) => x.id) : [];
+  pushFeed(s, now, "hello", `👋 ${line}`, [pl.id], null, { line, circle: pl.circle ?? null, mates });
+}
+
 /** Older saved states get the fields newer versions rely on. */
 export function normalize(s: GameState): GameState {
   s.seq ??= 0;
@@ -90,6 +101,7 @@ export function normalize(s: GameState): GameState {
     p.hat ??= null;
     p.item ??= null;
     p.circle ??= null;
+    p.story ??= null;
     p.spectator ??= false;
   }
   for (const sh of s.shouts) sh.video ??= null;
@@ -696,16 +708,18 @@ const PLAYER: Record<string, Handler> = {
       pl.token = newId(24);
       pl.joinedAt = now;
       if (p.circle !== undefined) pl.circle = str(p.circle, 20) || pl.circle;
+      if (p.story !== undefined) pl.story = str(p.story, 120) || pl.story;
       if (p.spectator !== undefined) pl.spectator = !!p.spectator;
     } else {
       if (!s.settings.allowJoinNew) fail("אפשר להצטרף רק עם שם מהרשימה. בקשו מהמנחה להוסיף אתכם.");
       const name = str(p.name, 16);
       if (name.length < 2) fail("השם צריך להכיל לפחות 2 תווים");
       if (s.players.some((x) => x.name === name)) fail("השם הזה כבר ברשימה. בחרו אותו משם");
-      pl = { id: newId(), name, ticker: ipoTicker(s), photo: null, isGroom: false, token: newId(24), joinedAt: now, hat: null, item: null, circle: str(p.circle, 20) || null, spectator: !!p.spectator };
+      pl = { id: newId(), name, ticker: ipoTicker(s), photo: null, isGroom: false, token: newId(24), joinedAt: now, hat: null, item: null, circle: str(p.circle, 20) || null, story: str(p.story, 120) || null, spectator: !!p.spectator };
       s.players.push(pl);
     }
     dealTo(s, pl);
+    hello(s, pl, now);
     return { token: pl.token, playerId: pl.id };
   },
 
@@ -1467,12 +1481,13 @@ const ADMIN: Record<string, Handler> = {
     const isGroom = !!d.isGroom;
     if (isGroom) for (const x of s.players) x.isGroom = false;
     const circle = "circle" in d ? str(d.circle, 20) || null : (existing?.circle ?? null);
+    const story = "story" in d ? str(d.story, 120) || null : (existing?.story ?? null);
     if (existing) {
-      Object.assign(existing, { name, ticker, isGroom, circle });
+      Object.assign(existing, { name, ticker, isGroom, circle, story });
       if ("photo" in d) existing.photo = media(d.photo);
       return { id: existing.id };
     }
-    const pl: PlayerRec = { id: newId(), name, ticker, photo: media(d.photo), isGroom, token: null, joinedAt: null, hat: null, item: null, circle, spectator: false };
+    const pl: PlayerRec = { id: newId(), name, ticker, photo: media(d.photo), isGroom, token: null, joinedAt: null, hat: null, item: null, circle, story, spectator: false };
     s.players.push(pl);
     return { id: pl.id };
   },

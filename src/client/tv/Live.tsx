@@ -328,15 +328,7 @@ export function ChatLog({ view, game }: { view: ClientView; game: Game }) {
     [game],
   );
 
-  // who just walked in
-  const claimed = useRef(new Set(players.filter((p) => p.claimed).map((p) => p.id)));
-  useEffect(() => {
-    for (const p of players)
-      if (p.claimed && !claimed.current.has(p.id)) {
-        claimed.current.add(p.id);
-        push({ id: `j:${p.id}:${Date.now()}`, at: Date.now(), who: p, kind: "sys", text: `✅ ${p.name} נכנס לבורסה` });
-      } else if (!p.claimed) claimed.current.delete(p.id);
-  }, [players]); // eslint-disable-line react-hooks/exhaustive-deps
+  // who just walked in: the server's hello lands in the feed, and shows up here like any other news
 
   // the live round: opened, every bet (never on what), closed, the result
   const r = view.pub.round;

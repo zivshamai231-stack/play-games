@@ -6,14 +6,14 @@ import type { EventContent, MissionSeed, PlayerSeed, QuizSeed, RoundSeed } from 
 
 const PLAYERS: PlayerSeed[] = [
   ["tomer", "תומר", "TOMR", true, "משפחה"],
-  ["maya", "מאיה", "MAYA", false, "משפחה"],
-  ["noam", "נועם", "NOAM", false, "תיכון"],
+  ["maya", "מאיה", "MAYA", false, "משפחה", "אחות גדולה. החלפתי לו טיטולים, אז שלא ידבר"],
+  ["noam", "נועם", "NOAM", false, "תיכון", "ישבנו באותו שולחן בכיתה י׳ ולא הפסקנו לדבר מאז"],
   ["shira", "שירה", "SHIR", false, "תיכון"],
-  ["eden", "עדן", "EDEN", false, "צבא"],
+  ["eden", "עדן", "EDEN", false, "צבא", "אותה מחלקה בטירונות. הוא נרדם בשמירה, אני כיסיתי"],
   ["eitan", "איתן", "ETAN", false, "צבא"],
-  ["lior", "ליאור", "LIOR", false, "עבודה"],
+  ["lior", "ליאור", "LIOR", false, "עבודה", "גנב לי סנדוויץ׳ מהמקרר ביום הראשון שלו"],
   ["yael", "יעל", "YAEL", false, "עבודה"],
-  ["roni", "רוני", "RONI", false, "החברים של מאיה"],
+  ["roni", "רוני", "RONI", false, "החברים של מאיה", "הכרנו דרך מאיה. נשארנו בגלל המנגל"],
   ["dana", "דנה", "DANA", false, "החברים של מאיה"],
 ];
 

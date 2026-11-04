@@ -100,6 +100,7 @@ function PlayerForm({ value, game, run, onDone }: { value: PlayerPub | null; gam
   const [isGroom, setIsGroom] = useState(value?.isGroom ?? false);
   const [photo, setPhoto] = useState<string | null>(value?.photo ?? null);
   const [circle, setCircle] = useState(value?.circle ?? "");
+  const [story, setStory] = useState(value?.story ?? "");
   const [busy, setBusy] = useState(false);
   const preview = { id: value?.id ?? "new", name: name || "?", photo, isGroom };
 
@@ -120,7 +121,7 @@ function PlayerForm({ value, game, run, onDone }: { value: PlayerPub | null; gam
       className="form"
       onSubmit={async (e) => {
         e.preventDefault();
-        const ok = await run("savePlayer", { player: { id: value?.id, name, ticker, isGroom, photo, circle } }, "נשמר");
+        const ok = await run("savePlayer", { player: { id: value?.id, name, ticker, isGroom, photo, circle, story } }, "נשמר");
         if (ok) onDone();
       }}
     >
@@ -152,6 +153,10 @@ function PlayerForm({ value, game, run, onDone }: { value: PlayerPub | null; gam
             <option key={c} value={c} />
           ))}
         </datalist>
+      </label>
+      <label className="field">
+        <span>איך הכיר את {WORDS.star}, במשפט (עולה לטלוויזיה כשנכנס)</span>
+        <input value={story} onChange={(e) => setStory(e.target.value)} maxLength={120} />
       </label>
       <label className="check">
         <input type="checkbox" checked={isGroom} onChange={(e) => setIsGroom(e.target.checked)} />

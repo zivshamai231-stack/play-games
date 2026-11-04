@@ -3121,3 +3121,79 @@ html.is-tv body {
   background: var(--gold-hi);
   box-shadow: 0 0 18px color-mix(in srgb, var(--gold-hi) 80%, transparent);
 }
+
+/* a guest walks in */
+/* at the top, so it never covers the lobby's QR code while people are still joining */
+.hello {
+  position: absolute;
+  top: 112px;
+  left: 50%;
+  z-index: 40;
+  width: 1160px;
+  margin-left: -580px;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  padding: 30px 44px;
+  border-radius: 34px;
+  color: var(--almond);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--felt-hi) 90%, black), color-mix(in srgb, var(--felt) 80%, black));
+  box-shadow:
+    inset 0 0 0 4px var(--gold),
+    0 30px 90px rgba(0, 0, 0, 0.6);
+}
+
+.hello-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.hello-kicker {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.hello-name {
+  font-family: var(--display);
+  font-size: 92px;
+  font-weight: 900;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.hello-circle {
+  padding: 6px 22px;
+  border-radius: 999px;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--ink);
+  background: var(--gold);
+}
+
+.hello-line {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--almond-dim);
+}
+
+.hello-mates {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hello-line.story {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--almond);
+}

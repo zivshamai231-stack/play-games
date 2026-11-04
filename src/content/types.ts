@@ -3,8 +3,8 @@ import type { Audience, ID, RoundOption, Settings } from "../shared/types";
 /* Everything that changes from one party to the next lives in one EventContent object.
    The engine (rules, money, screens) never names a person, a place or a joke. */
 
-/** [id, name, ticker, is the star of the night, circle (how they know the star)] */
-export type PlayerSeed = [id: string, name: string, ticker: string, star?: boolean, circle?: string];
+/** [id, name, ticker, is the star of the night, circle (how they know the star), how they met, in one line (the TV shows it when they walk in)] */
+export type PlayerSeed = [id: string, name: string, ticker: string, star?: boolean, circle?: string, story?: string];
 /** [emoji, title, note, options, who sits it out, one-on-one game id] */
 export type RoundSeed = [emoji: string, title: string, note: string, options: RoundOption[], noBet: string[], game?: string];
 /** [emoji, title, note, options, right answer (null = the host picks it live), who sits it out] */
@@ -48,6 +48,8 @@ export interface Lines {
   doubled: string[];
   drink: string[];
   photo: string[];
+  /** a guest walks in: {n} the name, {t} " מהצבא" (their circle, with a leading space) or nothing */
+  hello: string[];
   /** the crown duel: {c} the challenger, {k} the king, {r} the stake */
   crownFell: string;
   crownHeld: string;

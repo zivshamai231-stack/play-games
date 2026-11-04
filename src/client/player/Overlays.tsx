@@ -219,7 +219,7 @@ export function FeedWatcher({ view, meId }: { view: ClientView; meId: string }) 
         setFlash({ kind: "drink", title: `🃏 קלף זהב של ${WORDS.star}: זה עליך`, sub: e.data?.line ?? e.text });
         sfx.gotcha();
         navigator.vibrate?.([120, 60, 120, 60, 300]);
-      } else {
+      } else if (e.kind !== "hello") {
         toast(e.text, e.kind === "miss" && e.players[0] === meId ? "err" : "info", 5500);
       }
     }

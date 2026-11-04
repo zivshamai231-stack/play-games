@@ -51,12 +51,33 @@ tokens[guy] = r.r.token;
 v = await view();
 ok(v.pub.players.find((p) => p.id === guy)?.circle === "שכנים", "the new guest's circle is saved");
 
+ok(v.pub.players.find((p) => p.id === "noam")?.story?.includes("כיתה י׳"), "the story from the organizer's form is on the player");
+r = await act("join", { name: "טל", circle: "צבא", story: "  נפגשנו בתור למקלחת בבה״ד 1  " });
+ok(r.ok, "a walk-in guest writes how they met the star");
+v = await view();
+ok(v.pub.players.find((p) => p.id === r.r.playerId)?.story === "נפגשנו בתור למקלחת בבה״ד 1", "the story is saved, trimmed");
+seeded.push(r.r.playerId);
+tokens[r.r.playerId] = r.r.token;
+
 r = await act("join", { name: "רותם", circle: "עבודה", spectator: true });
 ok(r.ok && r.d.me.missions.length === 0, "a spectator joins with no missions");
 const rotem = r.r.playerId;
 tokens[rotem] = r.r.token;
 r = await act("extraMission", {}, { token: tokens[rotem] });
 ok(!r.ok, "a spectator can't ask for an extra mission");
+
+console.log("the TV says hello");
+v = await view();
+const hellos = v.pub.feed.filter((e) => e.kind === "hello");
+ok(hellos.length === seeded.length + 2, `one hello per guest who walked in: ${hellos.length}`);
+const guyHello = hellos.find((e) => e.players[0] === guy);
+ok(guyHello?.text.includes("גיא") && guyHello.text.includes("מהשכנים"), `the hello names the guest and the circle: ${guyHello?.text}`);
+ok(guyHello?.data?.circle === "שכנים" && guyHello.data.mates.length === 0, "first from the neighbours: nobody else from there yet");
+await admin("releasePlayer", { playerId: "noam" });
+r = await act("join", { playerId: "noam" });
+tokens.noam = r.r?.token;
+v = await view();
+ok(v.pub.feed.filter((e) => e.kind === "hello" && e.players[0] === "noam").length === 1, "joining again from another phone doesn't say hello twice");
 
 console.log("missions mix the circles");
 v = await view();

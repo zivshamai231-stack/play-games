@@ -316,11 +316,13 @@ function NewsBanner({ feed, players, skipShots, offset }: { feed: FeedEvent[]; p
       else sfx.fanfare();
       burst("big");
     }
+    else if (current.kind === "hello") sfx.join();
     else if (current.kind === "caught") sfx.gotcha();
     else if (current.kind === "miss") sfx.lose();
     else sfx.coin();
     speak(`feed:${current.id}`);
-    const ms = current.kind === "broke" ? 10_000 : big ? 8500 : 7500;
+    // a crowd walking in at once gets shorter hellos, so the line doesn't pile up
+    const ms = current.kind === "hello" ? (queue.filter((e) => e.kind === "hello").length > 2 ? 3500 : 6000) : current.kind === "broke" ? 10_000 : big ? 8500 : 7500;
     if (big) holdTv(ms);
     const id = window.setTimeout(() => setQueue((q) => q.slice(1)), ms);
     return () => window.clearTimeout(id);
@@ -331,6 +333,12 @@ function NewsBanner({ feed, players, skipShots, offset }: { feed: FeedEvent[]; p
     return (
       <AnimatePresence>
         <MysterySpot key={current.id} line={current.data?.line ?? current.text} until={current.data?.until} offset={offset} />
+      </AnimatePresence>
+    );
+  if (current?.kind === "hello" && people.length)
+    return (
+      <AnimatePresence>
+        <HelloCard key={current.id} e={current} p={people[0]} players={players} />
       </AnimatePresence>
     );
   if (current && BIG.has(current.kind) && people.length)
@@ -362,6 +370,39 @@ function NewsBanner({ feed, players, skipShots, offset }: { feed: FeedEvent[]; p
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+/** A guest walks in: a name card, their circle, and how they met the star (or, without a story, who else from that circle is here). */
+function HelloCard({ e, p, players }: { e: FeedEvent; p: PlayerPub; players: PlayerPub[] }) {
+  const mates = (e.data?.mates ?? []).map((id) => players.find((x) => x.id === id)).filter((x): x is PlayerPub => !!x);
+  const circle = e.data?.circle && e.data.circle !== "אחר" ? e.data.circle : null;
+  const names = mates.slice(0, 4).map((m) => m.name).join(", ") + (mates.length > 4 ? ` ועוד ${mates.length - 4}` : "");
+  return (
+    <motion.div
+      className="hello"
+      initial={{ y: -320, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -320, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 200, damping: 22 }}
+    >
+      <Avatar p={p} size={200} />
+      <div className="hello-body">
+        <span className="hello-kicker">👋 הצטרפות חדשה</span>
+        <strong className="hello-name">{p.name}</strong>
+        {circle && <span className="hello-circle">{circle}</span>}
+        <p className={cls("hello-line", p.story && "story")}>
+          {p.story ? `״${p.story}״` : mates.length ? `כבר כאן מאותו עולם: ${names}` : circle ? "אף אחד מהעולם הזה עוד לא כאן. הזדמנות להכיר" : "תגידו שלום"}
+        </p>
+      </div>
+      {mates.length > 0 && (
+        <div className="hello-mates" aria-hidden="true">
+          {mates.slice(0, 4).map((m) => (
+            <Avatar key={m.id} p={m} size={96} />
+          ))}
+        </div>
+      )}
+    </motion.div>
   );
 }
 
