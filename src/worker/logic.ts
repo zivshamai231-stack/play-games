@@ -1,6 +1,9 @@
 import type { Audience, FeedEvent, FeedKind, GameState, GroomCard, Shout, ID, Mission, PlayerRec, RoundKind, RoundOption, RoundRec, TargetSlot, TvMode, WheelKind } from "../shared/types";
 import { GAMES, SHOP } from "../shared/catalog";
 import { EVENT } from "../content";
+import { TONES } from "../content/tones";
+import type { Surprise } from "../content/types";
+import { copyFor } from "./copy";
 import { DEFAULT_SETTINGS, seedState } from "./seed";
 
 /** A rule violation. Its message is shown to the person as-is. */
@@ -143,9 +146,6 @@ function disarmRound(s: GameState, r: RoundRec) {
 
 /* ---------- the funny bits: unfiltered lines for the TV and the announcer ---------- */
 
-const LINES = EVENT.lines;
-/** What else the wheel can land on, besides a challenge or a question. */
-const SURPRISES = EVENT.surprises;
 
 const andList = (names: string[]) => (names.length > 1 ? `${names.slice(0, -1).join(", ")} ו${names[names.length - 1]}` : (names[0] ?? ""));
 const fill = (pool: string[], who: string) => sample(pool).replaceAll("{n}", who);
@@ -164,10 +164,10 @@ const DRAW_MS = 8000;
 export const isLate = (s: GameState) => s.rounds.filter((r) => r.kind !== "night" && r.status === "resolved").length >= EVENT.lateAfter;
 
 function pickTask(s: GameState) {
-  if (!isLate(s)) return sample(EVENT.tasks);
-  const big = EVENT.bigTask;
+  if (!isLate(s)) return sample(copyFor(s).tasks);
+  const big = copyFor(s).bigTask;
   if (big && !s.rounds.some((r) => r.task === big) && Math.random() < 0.5) return big;
-  return sample([...EVENT.tasks, ...EVENT.lateTasks]);
+  return sample([...copyFor(s).tasks, ...copyFor(s).lateTasks]);
 }
 
 function roast(s: GameState, ids: ID[], one: string[], many: string[], groom: string[]) {
@@ -184,7 +184,7 @@ function verdict(s: GameState, r: RoundRec, winId: ID) {
   const w = r.options.find((o) => o.id === winId)?.playerId;
   const rivals = r.options.filter((o) => o.playerId && o.playerId !== w).map((o) => nameOf(s, o.playerId!));
   if (w && rivals.length) {
-    lines.duel = sample(LINES.duel)
+    lines.duel = sample(copyFor(s).lines.duel)
       .replaceAll("{w}", nameOf(s, w))
       .replaceAll("{l}", andList(rivals))
       .replaceAll("{game}", (r.game && GAMES[r.game]?.name) || "האתגר");
@@ -193,15 +193,15 @@ function verdict(s: GameState, r: RoundRec, winId: ID) {
   r.task = null;
   r.losers = [];
   if (r.refunded) {
-    lines.lose = sample(LINES.none);
-    r.task = EVENT.everyoneTask;
+    lines.lose = sample(copyFor(s).lines.none);
+    r.task = copyFor(s).everyoneTask;
     r.losers = [...new Set(s.bets.filter((b) => b.roundId === r.id).map((b) => b.playerId))];
   } else {
     const win = res.filter((e) => e.delta > 0).map((e) => e.playerId);
     const lose = res.filter((e) => e.delta < 0).map((e) => e.playerId);
-    if (win.length) lines.win = roast(s, win, LINES.win1, LINES.winN, LINES.starWin);
+    if (win.length) lines.win = roast(s, win, copyFor(s).lines.win1, copyFor(s).lines.winN, copyFor(s).lines.starWin);
     if (lose.length) {
-      lines.lose = roast(s, lose, LINES.lose1, LINES.loseN, LINES.starLose);
+      lines.lose = roast(s, lose, copyFor(s).lines.lose1, copyFor(s).lines.loseN, copyFor(s).lines.starLose);
       r.task = pickTask(s);
       r.losers = lose;
     }
@@ -214,16 +214,16 @@ function quizLines(s: GameState, r: RoundRec) {
   const answered = new Set(s.bets.filter((b) => b.roundId === r.id).map((b) => b.playerId));
   const right = s.ledger.filter((e) => e.kind === "quiz" && e.ref === r.id).map((e) => e.playerId);
   const lines: Record<string, string> = {};
-  if (right.length) lines.fast = fill(LINES.fast, nameOf(s, right[0]));
+  if (right.length) lines.fast = fill(copyFor(s).lines.fast, nameOf(s, right[0]));
   if (right.length > 1) lines.kings = `צדקו גם: ${andList(right.slice(1).map((id) => nameOf(s, id)))}`;
-  if (r.loserReason === "slow" && r.losers[0]) lines.slow = fill(LINES.slow, nameOf(s, r.losers[0]));
+  if (r.loserReason === "slow" && r.losers[0]) lines.slow = fill(copyFor(s).lines.slow, nameOf(s, r.losers[0]));
   else if (r.losers.length) {
     const wrong = r.losers.filter((id) => answered.has(id)).map((id) => nameOf(s, id));
     const silent = r.losers.filter((id) => !answered.has(id)).map((id) => nameOf(s, id));
     const parts: string[] = [];
-    if (wrong.length) parts.push(fill(wrong.length > 1 ? LINES.wrongN : LINES.wrong1, andList(wrong)));
-    if (silent.length) parts.push(fill(silent.length > 1 ? LINES.silentN : LINES.silent1, andList(silent)));
-    lines.shot = `${parts.join(". ")}. ${r.losers.length > 1 ? "המשימה של כולם" : "המשימה"}: ${EVENT.lines.quizPenalty}`;
+    if (wrong.length) parts.push(fill(wrong.length > 1 ? copyFor(s).lines.wrongN : copyFor(s).lines.wrong1, andList(wrong)));
+    if (silent.length) parts.push(fill(silent.length > 1 ? copyFor(s).lines.silentN : copyFor(s).lines.silent1, andList(silent)));
+    lines.shot = `${parts.join(". ")}. ${r.losers.length > 1 ? "המשימה של כולם" : "המשימה"}: ${copyFor(s).lines.quizPenalty}`;
   }
   r.lines = lines;
 }
@@ -249,7 +249,7 @@ function settleVote(s: GameState, r: RoundRec, win: RoundOption, now: number) {
   r.losers = chosen.map((o) => o.playerId).filter((x): x is ID => !!x);
   r.loserReason = "voted";
   r.refunded = false;
-  r.lines = { voted: fill(r.losers.length > 1 ? LINES.votedN : LINES.voted1, andList(r.losers.map((id) => nameOf(s, id)))) };
+  r.lines = { voted: fill(r.losers.length > 1 ? copyFor(s).lines.votedN : copyFor(s).lines.voted1, andList(r.losers.map((id) => nameOf(s, id)))) };
   if (right.length) r.lines.majority = `הצביעו כמו הרוב: ${andList(right.map((id) => nameOf(s, id)))}`;
 }
 
@@ -267,7 +267,7 @@ export function closeVote(s: GameState, r: RoundRec, now: number) {
     return;
   }
   r.losers = s.players.filter((p) => p.token && !r.noBet.includes(p.id)).map((p) => p.id);
-  Object.assign(r, { status: "resolved", winnerId: null, resolvedAt: now, refunded: true, loserReason: "voted", lines: { voted: sample(LINES.noVotes) } });
+  Object.assign(r, { status: "resolved", winnerId: null, resolvedAt: now, refunded: true, loserReason: "voted", lines: { voted: sample(copyFor(s).lines.noVotes) } });
   s.lastResolvedId = r.id;
   if (s.activeRoundId === r.id) s.tv = { mode: "round", at: now, step: 0 };
   if (r.losers.length) pushFeed(s, now, "shot", `🥃 ${r.lines.voted}`, r.losers, r.id);
@@ -280,7 +280,7 @@ function settleContest(s: GameState, r: RoundRec, win: RoundOption, now: number)
   const prize = r.reward * payMult(r);
   for (const o of chosen) if (o.playerId) s.ledger.push({ id: newId(), playerId: o.playerId, delta: prize, kind: "contest", ref: r.id, note: "📸 ניצח בתחרות התמונות", at: now });
   Object.assign(r, { losers: [], loserReason: null, refunded: false });
-  r.lines = { photo: sample(LINES.photo).replaceAll("{n}", andList(chosen.map((o) => nameOf(s, o.playerId ?? "")))) };
+  r.lines = { photo: sample(copyFor(s).lines.photo).replaceAll("{n}", andList(chosen.map((o) => nameOf(s, o.playerId ?? "")))) };
 }
 
 /** Pictures are in: everybody votes, for 45 seconds. */
@@ -299,8 +299,8 @@ function crownDuel(s: GameState, r: RoundRec, win: RoundOption, now: number) {
   if (win.playerId === challenger) {
     s.ledger.push({ id: newId(), playerId: king, delta: -CROWN_STAKE, kind: "crown", ref: r.id, note: `הפסיד את הכתר ל${c}`, at: now });
     s.ledger.push({ id: newId(), playerId: challenger, delta: CROWN_STAKE, kind: "crown", ref: r.id, note: `הפיל את ${k} בקרב על הכתר`, at: now });
-    r.lines.duel = EVENT.lines.crownFell.replaceAll("{c}", c).replaceAll("{k}", k).replaceAll("{r}", fmt(CROWN_STAKE));
-  } else r.lines.duel = EVENT.lines.crownHeld.replaceAll("{c}", c).replaceAll("{k}", k);
+    r.lines.duel = copyFor(s).lines.crownFell.replaceAll("{c}", c).replaceAll("{k}", k).replaceAll("{r}", fmt(CROWN_STAKE));
+  } else r.lines.duel = copyFor(s).lines.crownHeld.replaceAll("{c}", c).replaceAll("{k}", k);
 }
 
 /** Right calls in a row on challenges and questions, newest first. Rounds you sat out don't break it. */
@@ -324,7 +324,7 @@ function streaks(s: GameState, r: RoundRec, now: number) {
     if (k < 3 || k % 2 === 0) continue;
     const bonus = 50 * (k - 1);
     s.ledger.push({ id: newId(), playerId: pid, delta: bonus, kind: "streak", ref: r.id, note: `🔥 ${k} ברצף`, at: now });
-    const line = sample(LINES.streak).replaceAll("{n}", nameOf(s, pid)).replaceAll("{k}", String(k));
+    const line = sample(copyFor(s).lines.streak).replaceAll("{n}", nameOf(s, pid)).replaceAll("{k}", String(k));
     pushFeed(s, now, "streak", `🔥 ${line}. בונוס מהבנק: +${fmt(bonus)}`, [pid], r.id, { line, amount: bonus, streak: k });
   }
 }
@@ -337,7 +337,7 @@ function watchKing(s: GameState, now: number) {
   const old = s.king && s.players.some((x) => x.id === s.king) ? s.king : null;
   s.king = st[0].id;
   s.kingAt = now;
-  const line = old ? sample(LINES.king).replaceAll("{n}", st[0].name).replaceAll("{o}", nameOf(s, old)) : fill(LINES.kingFirst, st[0].name);
+  const line = old ? sample(copyFor(s).lines.king).replaceAll("{n}", st[0].name).replaceAll("{o}", nameOf(s, old)) : fill(copyFor(s).lines.kingFirst, st[0].name);
   pushFeed(s, now, "king", `👑 ${line}`, [st[0].id], null, { line });
 }
 
@@ -357,7 +357,7 @@ function payMission(s: GameState, m: Mission, now: number) {
   Object.assign(m, { status: "done", doneAt: now, confirmBy: null });
   const who = nameOf(s, holder);
   const line = targets.length
-    ? sample(targets.length > 1 ? LINES.revealN : LINES.reveal)
+    ? sample(targets.length > 1 ? copyFor(s).lines.revealN : copyFor(s).lines.reveal)
         .replaceAll("{n}", who)
         .replaceAll("{t}", andList(targets.map((t) => nameOf(s, t))))
         .replaceAll("{r}", fmt(m.reward))
@@ -449,10 +449,11 @@ function watchBroke(s: GameState, before: Map<ID, number>, now: number) {
     const pl = s.players.find((p) => p.id === pid);
     if (!pl?.token || was < BROKE_AT || balanceOf(s, pid) >= BROKE_AT) continue;
     if (s.bailouts.some((b) => b.playerId === pid && b.status === "pending")) continue;
-    const task = sample(isLate(s) && EVENT.bigTask ? [...EVENT.brokeTasks, EVENT.bigTask] : EVENT.brokeTasks);
+    const big = copyFor(s).bigTask;
+    const task = sample(isLate(s) && big ? [...copyFor(s).brokeTasks, big] : copyFor(s).brokeTasks);
     const id = newId();
     s.bailouts.push({ id, playerId: pid, at: now, status: "pending", dare: task });
-    const line = fill(LINES.broke, pl.name);
+    const line = fill(copyFor(s).lines.broke, pl.name);
     pushFeed(s, now, "broke", `💸 ${line}. המשימה: ${task}`, [pid], id, { line, task });
   }
 }
@@ -653,7 +654,7 @@ function wheelSegments(s: GameState, kind: WheelKind): [string, ID[]][] {
   const second = ids[1] ?? king;
   const last = ids[ids.length - 1];
   const last2 = ids[ids.length - 2];
-  if (kind === "punish") return EVENT.punishments.map((t) => [t, [last]]);
+  if (kind === "punish") return copyFor(s).punishments.map((t) => [t, [last]]);
   const groom = s.players.find((p) => p.isGroom)?.id ?? king;
   const lastRound = s.rounds.find((r) => r.id === s.lastResolvedId);
   const losers = !lastRound
@@ -663,10 +664,11 @@ function wheelSegments(s: GameState, kind: WheelKind): [string, ID[]][] {
       : [...new Set(s.ledger.filter((e) => e.kind === "bet" && e.ref === lastRound.id && e.delta < 0).map((e) => e.playerId))];
   const below = st.filter((p) => p.balance < s.settings.startBalance).map((p) => p.id);
   const who = { last: [last], king: [king], second: [second], losers: losers.length ? losers : [last], star: [groom], everyone: ids, below, last2: last2 ? [last2, last] : [last], none: [] as ID[] };
-  const segs: [string, ID[]][] = EVENT.drinkWheel.map(([label, k]) => [label.replaceAll("{start}", fmt(s.settings.startBalance)), who[k]]);
+  const segs: [string, ID[]][] = copyFor(s).drinkWheel.map(([label, k]) => [label.replaceAll("{start}", fmt(s.settings.startBalance)), who[k]]);
   // late in the night one quiet slot turns into the big one
-  const quiet = EVENT.drinkWheel.findIndex(([, k]) => k === "none");
-  if (isLate(s) && EVENT.lateWheel && quiet >= 0) segs[quiet] = [EVENT.lateWheel[0], who[EVENT.lateWheel[1]]];
+  const quiet = copyFor(s).drinkWheel.findIndex(([, k]) => k === "none");
+  const late = copyFor(s).lateWheel;
+  if (isLate(s) && late && quiet >= 0) segs[quiet] = [late[0], who[late[1]]];
   return segs;
 }
 
@@ -784,7 +786,7 @@ const PLAYER: Record<string, Handler> = {
     m.deniedBy = null;
     if (win <= 0) return void settleMission(s, m, c.now);
     const span = win === 90 ? "דקה וחצי" : win === 60 ? "דקה" : win === 30 ? "חצי דקה" : win === 120 ? "שתי דקות" : `${win} שניות`;
-    const line = sample(LINES.alert).replaceAll("{t}", span);
+    const line = sample(copyFor(s).lines.alert).replaceAll("{t}", span);
     pushFeed(s, c.now, "mission", `🚨 ${line}`, [], m.id, { line, until: c.now + win * 1000 });
   },
 
@@ -844,18 +846,18 @@ const PLAYER: Record<string, Handler> = {
       s.activeRoundId = null;
       if (s.draw?.roundId === r.id) s.draw = null;
       s.tv = { mode: "board", at: c.now, step: 0 };
-      const line = sample(LINES.veto);
+      const line = sample(copyFor(s).lines.veto);
       pushFeed(s, c.now, "card", `🛑 ${line}`, [pl.id], r.id, { line, card });
     } else if (card === "double") {
       if (!r || r.kind !== "challenge" || !bettingOpen(r, c.now)) fail("מכפילים הימור על אתגר שפתוח עכשיו להימורים");
       const b = s.bets.find((x) => x.roundId === r.id && x.playerId === pl.id) ?? fail("קודם מהמרים, ואז מכפילים");
       b.double = true;
-      const line = sample(LINES.doubled);
+      const line = sample(copyFor(s).lines.doubled);
       pushFeed(s, c.now, "card", `💥 ${line}`, [pl.id], r.id, { line, card });
     } else {
       const t = findPlayer(s, c.p.target);
       if (t.id === pl.id) fail("בחר מישהו אחר 😉");
-      const line = fill(LINES.drink, t.name);
+      const line = fill(copyFor(s).lines.drink, t.name);
       pushFeed(s, c.now, "card", `🥃 ${line}`, [t.id], null, { line, card });
     }
     s.cards[card] = true;
@@ -919,8 +921,8 @@ const PLAYER: Record<string, Handler> = {
     s.ledger.push({ id: newId(), playerId: pl.id, delta: -it.price, kind: "gift", ref: to.id, note: `${it.emoji} ${it.name} ל${to.name}`, at: c.now });
     const text =
       to.id === pl.id
-        ? `🎁 ${pl.name} קנה לעצמו ${it.name} ${it.emoji}. ${sample(LINES.selfGift)}`
-        : `🎁 ${pl.name} קנה ל${to.name} ${it.name} ${it.emoji}. ${sample(LINES.gift)}`;
+        ? `🎁 ${pl.name} קנה לעצמו ${it.name} ${it.emoji}. ${sample(copyFor(s).lines.selfGift)}`
+        : `🎁 ${pl.name} קנה ל${to.name} ${it.name} ${it.emoji}. ${sample(copyFor(s).lines.gift)}`;
     pushFeed(s, c.now, "gift", text, to.id === pl.id ? [pl.id] : [pl.id, to.id], to.id, { amount: it.price });
   },
 
@@ -1104,20 +1106,20 @@ const ADMIN: Record<string, Handler> = {
       skip = cur.id;
     }
     const pool = s.rounds.filter((r) => (mix ? r.kind !== "night" : r.kind === kind) && r.status === "draft" && r.id !== skip && !r.id.startsWith("duel-") && !r.id.startsWith("photo-"));
-    const forced = SURPRISES.find((x) => x.id === p.pick);
+    const forced = copyFor(s).surprises.find((x) => x.id === p.pick);
     if (!pool.length && !mix) fail(kind === "quiz" ? "נגמרו שאלות הידע במאגר" : kind === "vote" ? "נגמרו ההצבעות במאגר" : "נגמרו האתגרים במאגר");
     // the mixed wheel lands on a surprise now and then (always when the pool is empty)
-    const surprise = mix ? (forced ?? (!pool.length || Math.random() < 0.2 ? sample(SURPRISES) : undefined)) : undefined;
+    const surprise = mix ? (forced ?? (!pool.length || Math.random() < 0.2 ? sample(copyFor(s).surprises) : undefined)) : undefined;
     const r = surprise ? undefined : sample(pool);
     type Seg = { t: string; k: string };
     const ofRound = (x: RoundRec): Seg => ({ t: `${x.emoji} ${x.title}`, k: x.kind === "quiz" ? "q" : x.kind === "vote" ? "v" : "c" });
-    const ofSurprise = (x: (typeof SURPRISES)[number]): Seg => ({ t: x.label, k: "s" });
+    const ofSurprise = (x: Surprise): Seg => ({ t: x.label, k: "s" });
     const chosen = surprise ? ofSurprise(surprise) : ofRound(r!);
     // a few surprises always show on the mixed wheel, so it looks like anything can happen
-    const extra = mix ? shuffle(SURPRISES.filter((x) => x !== surprise)).slice(0, 3).map(ofSurprise) : [];
+    const extra = mix ? shuffle(copyFor(s).surprises.filter((x) => x !== surprise)).slice(0, 3).map(ofSurprise) : [];
     const others = shuffle([
       ...s.rounds.filter((x) => (mix ? x.kind !== "night" : x.kind === kind) && x !== r && !x.id.startsWith("duel-") && !x.id.startsWith("photo-")).map(ofRound),
-      ...(mix ? SURPRISES.filter((x) => x !== surprise).map(ofSurprise) : []),
+      ...(mix ? copyFor(s).surprises.filter((x) => x !== surprise).map(ofSurprise) : []),
     ]);
     const seen = new Set([chosen.t]);
     const list: Seg[] = [];
@@ -1422,12 +1424,12 @@ const ADMIN: Record<string, Handler> = {
       s.ledger.push({ id: newId(), playerId: a.by, delta: worth, kind: "catch", ref: a.id, note: `תפס את ${suspect}`, at: now });
       s.ledger.push({ id: newId(), playerId: a.suspect, delta: -worth, kind: "catch", ref: a.id, note: `נתפס על ידי ${by}`, at: now });
       dealTo(s, findPlayer(s, a.suspect));
-      pushFeed(s, now, "caught", `🕵️ ${by} תפס את ${suspect} על חם! המשימה: ${m.text}. ${by} גונב לו ${fmt(worth)} ${s.settings.currency}. ${sample(LINES.caught)}`, [a.by, a.suspect], a.id, { amount: worth, mission: m.id });
+      pushFeed(s, now, "caught", `🕵️ ${by} תפס את ${suspect} על חם! המשימה: ${m.text}. ${by} גונב לו ${fmt(worth)} ${s.settings.currency}. ${sample(copyFor(s).lines.caught)}`, [a.by, a.suspect], a.id, { amount: worth, mission: m.id });
     } else {
       a.status = "wrong";
       s.ledger.push({ id: newId(), playerId: a.by, delta: -s.settings.falsePenalty, kind: "penalty", ref: a.id, note: "האשמת שווא", at: now });
       s.ledger.push({ id: newId(), playerId: a.suspect, delta: s.settings.falsePenalty, kind: "penalty", ref: a.id, note: "פיצוי על האשמת שווא", at: now });
-      pushFeed(s, now, "miss", `🤡 האשמת שווא! ${by} חשד ב${suspect} ופספס. ${sample(LINES.miss)}`, [a.by, a.suspect], a.id);
+      pushFeed(s, now, "miss", `🤡 האשמת שווא! ${by} חשד ב${suspect} ופספס. ${sample(copyFor(s).lines.miss)}`, [a.by, a.suspect], a.id);
     }
   },
 
@@ -1438,7 +1440,7 @@ const ADMIN: Record<string, Handler> = {
       return;
     }
     const amount = s.settings.bailoutAmount;
-    Object.assign(b, { status: "granted", dare: b.dare ?? sample(EVENT.brokeTasks) });
+    Object.assign(b, { status: "granted", dare: b.dare ?? sample(copyFor(s).brokeTasks) });
     s.ledger.push({ id: newId(), playerId: b.playerId, delta: amount, kind: "bailout", ref: b.id, note: "חילוץ ממשלתי", at: now });
     pushFeed(s, now, "bailout", `🆘 חילוץ ממשלתי ל${nameOf(s, b.playerId)}: +${fmt(amount)}. בתמורה: ${b.dare}`, [b.playerId], b.id);
   },
@@ -1544,6 +1546,7 @@ const ADMIN: Record<string, Handler> = {
       confirmByTarget: d.confirmByTarget === undefined ? cur.confirmByTarget : !!d.confirmByTarget,
       confirmWindow: int(d.confirmWindow, cur.confirmWindow, 0, 900),
       theme: ["casino", "neon", "sunset", "midnight", "rose"].includes(String(d.theme)) ? String(d.theme) : cur.theme,
+      tone: String(d.tone) in TONES ? String(d.tone) : cur.tone,
     };
   },
 

@@ -136,6 +136,23 @@ ok(JSON.stringify(v.pub.round.options.map((o) => o.playerId).sort()) === JSON.st
 ok(v.pub.round.options.some((o) => o.playerId === guy), "including the guest who joined by name");
 await admin("cancelRound", { roundId: vote.id });
 
+console.log("the host switches the tone live");
+for (const [tone, pool] of [["calm", ["אף אחד לא הצביע. ממשיכים", "אין קולות הפעם"]], ["spicy", ["אף אחד לא הצביע. כולם שותים!", "אפס קולות. חבורת עצלנים. כולם שותים"]]]) {
+  r = await admin("saveSettings", { settings: { tone } });
+  ok(r.ok && (await view()).pub.settings.tone === tone, `tone set to ${tone}`);
+  const vr = (await view()).admin.rounds.find((x) => x.kind === "vote" && x.status === "draft");
+  await admin("openRound", { roundId: vr.id, seconds: 1 });
+  await sleep(1800);
+  const after = (await view()).admin.rounds.find((x) => x.id === vr.id);
+  ok(pool.includes(after.lines.voted), `${tone}: the announcer says "${after.lines.voted}"`);
+  await admin("cancelRound", { roundId: vr.id });
+}
+r = await admin("saveSettings", { settings: { tone: "nonsense" } });
+ok((await view()).pub.settings.tone === "spicy", "an unknown tone is ignored");
+await admin("saveSettings", { settings: { tone: "playful", theme: "neon" } });
+ok((await view()).pub.settings.theme === "neon", "the colors switch too");
+await admin("saveSettings", { settings: { theme: "casino" } });
+
 console.log("cleanup");
 await admin("saveSettings", { settings: { catchWindow: 30, confirmWindow: 90 } });
 await admin("resetGame", { unclaim: true, undeal: true });

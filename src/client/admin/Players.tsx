@@ -5,6 +5,7 @@ import type { Game } from "../net";
 import { Avatar, Money, Sheet, ask, toast } from "../ui";
 import type { Run } from "./AdminApp";
 import { CIRCLES, THEMES, WORDS } from "../../shared/catalog";
+import { TONES } from "../../content/tones";
 
 export function PlayersTab({ game, view, run }: { game: Game; view: ClientView; run: Run }) {
   const players = view.pub.players;
@@ -292,6 +293,17 @@ function Settings({ view, run }: { view: ClientView; run: Run }) {
             </button>
           ))}
         </div>
+      </fieldset>
+      <fieldset className="field theme-pick">
+        <legend>🎙️ הטון של הקריין (מתחלף מיד)</legend>
+        <div className="theme-row">
+          {Object.values(TONES).map((t) => (
+            <button key={t.id} type="button" className={cls("theme-btn", s.tone === t.id && "on")} title={t.blurb} onClick={() => run("saveSettings", { settings: { tone: t.id } }, `הטון: ${t.name}`)}>
+              {t.name}
+            </button>
+          ))}
+        </div>
+        <small className="muted">{Object.values(TONES).find((t) => t.id === s.tone)?.blurb}</small>
       </fieldset>
       <label className="check">
         <input type="checkbox" checked={s.allowJoinNew} onChange={(e) => run("saveSettings", { settings: { allowJoinNew: e.target.checked } }, "נשמר")} />

@@ -226,6 +226,21 @@ const VOTES: string[] = [
   "מי הכי סביר שיסיים את הלילה בלי חולצה?",
 ];
 
+const SOUNDS: EventContent["sounds"] = [
+  { id: "attention", emoji: "📢", label: "שימו לב!", line: "שימו לב יא זונות! שימו לב!", fx: "siren" },
+  { id: "cheers", emoji: "🥂", label: "לחיים!", line: "לחיים יא זונות! כוסות למעלה!", fx: "fanfare" },
+  { id: "applause", emoji: "👏", label: "מחיאות כפיים", fx: "applause" },
+  { id: "drums", emoji: "🥁", label: "תופים", fx: "drumroll" },
+  { id: "horn", emoji: "📯", label: "צופר", fx: "horn" },
+  { id: "groom", emoji: "🤵", label: "לכבוד החתן", line: "כולם לכבוד החתן! איתי! איתי! איתי!", fx: "fanfare" },
+  { id: "shot", emoji: "🥃", label: "שוט!", line: "שוט! שוט! שוט! יאללה יא זונות, למטה!", fx: "gotcha" },
+  { id: "boo", emoji: "👎", label: "בוז!", line: "בוווז! יא נוב, בוז!", fx: "boo" },
+  { id: "wow", emoji: "😱", label: "וואו!", line: "וואלה אחי, מה זה הדבר הזה?!", fx: "boing" },
+  { id: "quiet", emoji: "🤫", label: "שקט!", line: "שקט יא זונות! תנו לשמוע!", fx: "alert" },
+  { id: "yalla", emoji: "⏰", label: "יאללה, מהר!", line: "יאללה יאללה, מה אתם ישנים? תהמרו כבר!", fx: "alert" },
+  { id: "king", emoji: "👑", label: "תשתחוו למלך", line: "כולם להשתחוות למלך! יאללה, ראש לרצפה!", fx: "win" },
+];
+
 const POOL_TASK = "🌊 קפיצה לבריכה עם הבגדים!";
 
 const content: EventContent = {
@@ -291,6 +306,10 @@ const content: EventContent = {
   missions: MISSIONS,
   votes: VOTES,
   voteNote: "כולם מצביעים בטלפון. מי שמקבל הכי הרבה קולות שותה, ומי שהצביע כמו הרוב מקבל 100 שקדים.",
+  lateAfter: 8,
+  // the original was played with exactly this copy, so it replaces the tones instead of adding to them
+  copyMode: "replace",
+  copy: {
   lines: {
   // a mission was just done: nobody knows by whom (yet)
   alert: [
@@ -367,7 +386,6 @@ const content: EventContent = {
 },
   tasks: ["לגימה גדולה 🍺", "שוט 🥃", "10 שכיבות סמיכה 💪", "לשיר לאיתי שורה משיר אהבה 🎤", "להגיד לאיתי מחמאה מביכה מול כולם", "חצי בירה בלי ידיים", "לחקות את איתי עד שמישהו צוחק", "ריקוד של 15 שניות על הדשא"],
   lateTasks: [POOL_TASK, "🌊 עמידה מתחת למפל של הבריכה, 10 שניות", "שוט כפול 🥃🥃", "20 שכיבות סמיכה עם מישהו על הגב"],
-  lateAfter: 8,
   bigTask: POOL_TASK,
   everyoneTask: "כולם שותים לגימה 🍻",
   brokeTasks: ["20 שכיבות סמיכה", "שוט לבחירת החתן", "לשיר לאיתי שיר אהבה מול כולם", "ריקוד סולו של 20 שניות על הדשא", "נאום תודה של 30 שניות לבנק המרכזי (איתי)", "לגימה ענקית מול כולם"],
@@ -403,6 +421,9 @@ const content: EventContent = {
     ["🍋 שני האחרונים שותים", "last2"],
   ],
   lateWheel: ["🌊 המקום האחרון קופץ לבריכה!", "last"],
+    voice: "Speak natural Israeli Hebrew like a loud, cocky Israeli street guy (an ars) hosting a wild bachelor party: rough, slangy, high energy, sarcastic, with great comedic timing. Read exactly what is written, swear words included. Never translate or soften anything.",
+    soundLines: Object.fromEntries(SOUNDS.filter((x) => x.line).map((x) => [x.id, x.line!])),
+  },
   rules: [
   {
     emoji: "💰",
@@ -447,20 +468,7 @@ const content: EventContent = {
     line: "לא בטוחים מה עושים? הפס הצבעוני בטלפון תמיד אומר מה עכשיו. יאללה, מתחילים!",
   },
 ],
-  sounds: [
-  { id: "attention", emoji: "📢", label: "שימו לב!", line: "שימו לב יא זונות! שימו לב!", fx: "siren" },
-  { id: "cheers", emoji: "🥂", label: "לחיים!", line: "לחיים יא זונות! כוסות למעלה!", fx: "fanfare" },
-  { id: "applause", emoji: "👏", label: "מחיאות כפיים", fx: "applause" },
-  { id: "drums", emoji: "🥁", label: "תופים", fx: "drumroll" },
-  { id: "horn", emoji: "📯", label: "צופר", fx: "horn" },
-  { id: "groom", emoji: "🤵", label: "לכבוד החתן", line: "כולם לכבוד החתן! איתי! איתי! איתי!", fx: "fanfare" },
-  { id: "shot", emoji: "🥃", label: "שוט!", line: "שוט! שוט! שוט! יאללה יא זונות, למטה!", fx: "gotcha" },
-  { id: "boo", emoji: "👎", label: "בוז!", line: "בוווז! יא נוב, בוז!", fx: "boo" },
-  { id: "wow", emoji: "😱", label: "וואו!", line: "וואלה אחי, מה זה הדבר הזה?!", fx: "boing" },
-  { id: "quiet", emoji: "🤫", label: "שקט!", line: "שקט יא זונות! תנו לשמוע!", fx: "alert" },
-  { id: "yalla", emoji: "⏰", label: "יאללה, מהר!", line: "יאללה יאללה, מה אתם ישנים? תהמרו כבר!", fx: "alert" },
-  { id: "king", emoji: "👑", label: "תשתחוו למלך", line: "כולם להשתחוות למלך! יאללה, ראש לרצפה!", fx: "win" },
-],
+  sounds: SOUNDS,
   games: {
   pingpong: { emoji: "🏓", name: "פינג פונג", note: "משחק קצר עד 4 נקודות." },
   foosball: { emoji: "⚽", name: "כדורגל שולחן", note: "משחק קצר עד 4 גולים." },
@@ -496,7 +504,6 @@ const content: EventContent = {
   double: { emoji: "×2", name: "הכפלה", text: "מכפיל את מה שתרוויח מההימור שלך על האתגר הפתוח." },
   drink: { emoji: "🥃", name: "אתה שותה!", text: "בוחרים חבר, והוא שותה עכשיו מול כולם." },
 },
-  voice: "Speak natural Israeli Hebrew like a loud, cocky Israeli street guy (an ars) hosting a wild bachelor party: rough, slangy, high energy, sarcastic, with great comedic timing. Read exactly what is written, swear words included. Never translate or soften anything.",
 };
 
 export default content;

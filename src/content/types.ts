@@ -152,28 +152,15 @@ export interface EventContent {
   missions: MissionSeed[];
   votes: string[];
   voteNote: string;
-  lines: Lines;
-  /** what the losers of a challenge do; late tasks join after `lateAfter` rounds */
-  tasks: string[];
-  lateTasks: string[];
+  /** the party's own jokes, added on top of the host's tone (or the whole copy, with copyMode "replace") */
+  copy?: Partial<Omit<import("./tones").TonePack, "lines">> & { lines?: Partial<Lines> };
+  copyMode?: "add" | "replace";
+  /** late in the night (after this many rounds) the late tasks join in */
   lateAfter: number;
-  /** a once-a-night late task with its own chance (the pool jump); null = none */
-  bigTask: string | null;
-  /** when a challenge had no winners: everyone who bet does this */
-  everyoneTask: string;
-  brokeTasks: string[];
-  surprises: Surprise[];
-  punishments: string[];
-  /** the drink wheel's segments: {last}, {king}, {second}, {losers}, {star}, {below}, {all}, {late} pick who */
-  drinkWheel: [label: string, who: "last" | "king" | "second" | "losers" | "star" | "everyone" | "below" | "last2" | "none"][];
-  /** the late-night segment that replaces one wheel slot */
-  lateWheel: [label: string, who: "last" | "king"] | null;
   rules: Rule[];
   sounds: Sound[];
   games: Record<string, { emoji: string; name: string; note: string }>;
   shop: ShopItem[];
   reactions: string[];
   cards: Record<"veto" | "double" | "drink", { emoji: string; name: string; text: string }>;
-  /** the announcer's voice direction (OpenAI TTS instructions) */
-  voice: string;
 }

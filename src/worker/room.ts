@@ -2,7 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 import type { GameState, ID } from "../shared/types";
 import type { Env } from "./env";
 import { REACTIONS, RULES, SOUNDS } from "../shared/catalog";
-import { EVENT } from "../content";
+import { copyFor } from "./copy";
 import { GameError, dispatch, newId, nextDue, normalize, tick } from "./logic";
 import { seedState } from "./seed";
 import { buildPublic, viewFor } from "./views";
@@ -23,7 +23,6 @@ const MAX_VIDEO = 40_000_000;
 /** the most one piece of a video can be */
 const RANGE_MAX = 4 * 1024 * 1024;
 
-const VOICE = EVENT.voice;
 
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -346,7 +345,7 @@ export class GameRoom extends DurableObject<Env> {
     const [kind, id, key] = ref.split(":");
     if (kind === "feed") return this.s.feed.find((e) => e.id === id)?.text ?? null;
     if (kind === "round" && key) return this.s.rounds.find((r) => r.id === id)?.lines?.[key] ?? null;
-    if (kind === "sb") return SOUNDS.find((x) => x.id === id)?.line ?? null;
+    if (kind === "sb") return copyFor(this.s).soundLines[id] ?? SOUNDS.find((x) => x.id === id)?.line ?? null;
     if (kind === "rules") return RULES[Number(id)]?.line ?? null;
     return null;
   }
@@ -356,7 +355,9 @@ export class GameRoom extends DurableObject<Env> {
     const text = typeof body.ref === "string" ? this.lineFor(body.ref) : null;
     const clean = (text ?? "").replace(/[\p{Extended_Pictographic}\u200d\ufe0f]/gu, "").replace(/[()+]/g, " ").replace(/\s+/g, " ").trim();
     if (!clean) return json({ ok: false, err: "no line" }, 404);
-    const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(clean)));
+    const voice = copyFor(this.s).voice;
+    // the same words in another tone are another recording
+    const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${voice}\n${clean}`)));
     const key = `tts:${[...digest.slice(0, 12)].map((b) => b.toString(16).padStart(2, "0")).join("")}`;
     const headers = { "content-type": "audio/mpeg", "cache-control": "public, max-age=86400" };
     const cached = await this.readBlob(key);
@@ -366,7 +367,7 @@ export class GameRoom extends DurableObject<Env> {
     const res = await fetch("https://api.openai.com/v1/audio/speech", {
       method: "POST",
       headers: { authorization: `Bearer ${this.env.OPENAI_API_KEY}`, "content-type": "application/json" },
-      body: JSON.stringify({ model: "gpt-4o-mini-tts", voice: "ash", input: clean, instructions: VOICE, response_format: "mp3" }),
+      body: JSON.stringify({ model: "gpt-4o-mini-tts", voice: "ash", input: clean, instructions: voice, response_format: "mp3" }),
     });
     if (!res.ok) {
       console.error("tts failed", res.status, (await res.text()).slice(0, 300));

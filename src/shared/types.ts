@@ -36,6 +36,8 @@ export interface Settings {
   confirmWindow: number;
   /** the evening's colors: casino, neon, sunset, midnight, rose */
   theme: string;
+  /** the evening's tone: calm, playful, spicy (src/content/tones.ts) */
+  tone: string;
 }
 
 export interface PlayerRec {
