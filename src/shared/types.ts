@@ -1,7 +1,8 @@
 export type ID = string;
 
 export type Audience = "all" | "friends" | "groom";
-export type MissionStatus = "open" | "pending" | "done" | "burned";
+/** pending: in its catch window. confirm: waiting for whoever got played to say it happened */
+export type MissionStatus = "open" | "pending" | "confirm" | "done" | "burned";
 export type RoundStatus = "draft" | "open" | "closed" | "resolved";
 export type RoundKind = "challenge" | "night" | "quiz" | "vote" | "photo";
 export type TvMode = "lobby" | "round" | "board" | "night" | "missions" | "awards" | "winner" | "rules";
@@ -29,6 +30,10 @@ export interface Settings {
   nightCap: number;
   /** seconds everybody has to catch a finished mission before it pays */
   catchWindow: number;
+  /** after the catch window, whoever got played confirms on their phone before it pays (silence pays) */
+  confirmByTarget: boolean;
+  /** seconds the target has to answer */
+  confirmWindow: number;
 }
 
 export interface PlayerRec {
@@ -42,6 +47,10 @@ export interface PlayerRec {
   /** bought in the shop: an emoji on the head, and one next to the face */
   hat: string | null;
   item: string | null;
+  /** how they know the star (family, army, work...): missions pair people from different circles */
+  circle: string | null;
+  /** plays along without secret missions */
+  spectator: boolean;
 }
 
 /** A message, or a photo from someone's gallery, thrown onto the TV. */
@@ -159,6 +168,10 @@ export interface Mission {
   claimedAt: number | null;
   doneAt: number | null;
   caughtBy: ID | null;
+  /** status "confirm": pays by itself at this time unless a target says it didn't happen */
+  confirmBy: number | null;
+  /** a target said it didn't happen (shown to the holder) */
+  deniedBy?: ID | null;
 }
 
 export type LedgerKind = "bet" | "mission" | "adjust" | "catch" | "penalty" | "bailout" | "quiz" | "gift" | "vote" | "streak" | "swap" | "crown" | "contest";
@@ -260,6 +273,8 @@ export interface PlayerPub {
   last: number;
   hat: string | null;
   item: string | null;
+  circle: string | null;
+  spectator: boolean;
 }
 
 export interface OptionStat {
@@ -379,6 +394,8 @@ export interface MeView {
   burned: { text: string; by: ID | null }[];
   /** what you have riding on night bets right now */
   nightStaked: number;
+  /** missions someone says they did to you: did it really happen? */
+  toConfirm: { missionId: ID; by: ID; text: string; until: number }[];
 }
 
 export interface AdminView {

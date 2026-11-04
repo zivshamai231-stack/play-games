@@ -1,5 +1,6 @@
 import { type CSSProperties, useEffect, useState } from "react";
 import { cls } from "./lib";
+import { MEDIA, STAR_FACE, WORDS } from "../shared/catalog";
 
 // almonds thrown off the ride: [start x, start y, dx, dy, spin, delay]
 const FLYING: [number, number, number, number, number, number][] = [
@@ -35,23 +36,14 @@ export function useIntro(ms = 2800) {
   return on;
 }
 
-const RODEO = ["/photos/ai/rodeo-1.jpg", "/photos/ai/rodeo-2.jpg"];
-const LOADING = [
-  "מחממים את השקדים…",
-  "סופרים את הצ׳יפים…",
-  "מוודאים שאיתי עדיין רווק…",
-  "מנקים את שולחן הפינג פונג…",
-  "מדליקים את המנגל…",
-  "מקררים את השוטים…",
-  "מחממים את הבריכה…",
-  "פותחים את הבורסה…",
-];
+const RODEO = MEDIA.intro;
+const LOADING = WORDS.loading;
 
 /** The loading screen: the AI picture of Itay riding a golden almond, bucking, with silly status lines. */
 export function RodeoPhoto({ size = 300 }: { size?: number }) {
-  const [src] = useState(() => RODEO[Math.floor(Math.random() * RODEO.length)]);
+  const [src] = useState(() => RODEO[Math.floor(Math.random() * RODEO.length)] ?? "");
   const [line, setLine] = useState(() => Math.floor(Math.random() * LOADING.length));
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState(!RODEO.length);
   useEffect(() => {
     const id = window.setInterval(() => setLine((x) => (x + 1) % LOADING.length), 1100);
     return () => window.clearInterval(id);
@@ -62,7 +54,7 @@ export function RodeoPhoto({ size = 300 }: { size?: number }) {
         <RodeoItay size={size} />
       ) : (
         <div className="rodeo-frame">
-          <img src={src} alt="איתי בטוקסידו רוכב על שקד זהב ענק בקזינו" onError={() => setFailed(true)} />
+          <img src={src} alt="" onError={() => setFailed(true)} />
         </div>
       )}
       <p className="rodeo-line" key={line}>
@@ -75,7 +67,7 @@ export function RodeoPhoto({ size = 300 }: { size?: number }) {
 /** The loading-screen star: the groom as a bobblehead, riding a bucking mechanical almond. */
 export function RodeoItay({ size = 260, className }: { size?: number; className?: string }) {
   return (
-    <div className={cls("rodeo", className)} style={{ width: size }} role="img" aria-label="איתי רוכב על שקד ענק כמו בשור מכני">
+    <div className={cls("rodeo", className)} style={{ width: size }} role="img" aria-label="רוכב על מטבע ענק כמו בשור מכני">
       <svg viewBox="0 0 320 360" width="100%" aria-hidden="true">
         <defs>
           <linearGradient id="rd-almond" x1="0" y1="0" x2="1" y2="1">
@@ -160,7 +152,7 @@ export function RodeoItay({ size = 260, className }: { size?: number; className?
             <rect x="157" y="126" width="16" height="20" rx="6" fill="#d9a07a" />
             <g className="rd-head">
               <ellipse cx="165" cy="84" rx="52.5" ry="60.5" fill="#f3e3c3" />
-              <image href="/photos/funny/itay.jpg" x="104" y="26" width="122" height="122" clipPath="url(#rd-face)" />
+              {STAR_FACE && <image href={STAR_FACE} x="104" y="26" width="122" height="122" clipPath="url(#rd-face)" />}
             </g>
             {/* yee-haw: the other arm waves a cowboy hat (drawn over the head) */}
             <g className="rd-wave">

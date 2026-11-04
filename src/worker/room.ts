@@ -2,6 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 import type { GameState, ID } from "../shared/types";
 import type { Env } from "./env";
 import { REACTIONS, RULES, SOUNDS } from "../shared/catalog";
+import { EVENT } from "../content";
 import { GameError, dispatch, newId, nextDue, normalize, tick } from "./logic";
 import { seedState } from "./seed";
 import { buildPublic, viewFor } from "./views";
@@ -22,8 +23,7 @@ const MAX_VIDEO = 40_000_000;
 /** the most one piece of a video can be */
 const RANGE_MAX = 4 * 1024 * 1024;
 
-const VOICE =
-  "Speak natural Israeli Hebrew like a loud, cocky Israeli street guy (an ars) hosting a wild bachelor party: rough, slangy, high energy, sarcastic, with great comedic timing. Read exactly what is written, swear words included. Never translate or soften anything.";
+const VOICE = EVENT.voice;
 
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), {

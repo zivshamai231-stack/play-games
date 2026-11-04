@@ -5,6 +5,7 @@ import { LETTERS, cls, fmt, fmtX, mmss, multiplier, potOf, resizeImage } from ".
 import { type Game, useServerNow } from "../net";
 import { Avatar, Money, Sheet, ask, toast } from "../ui";
 import { type Run, WheelButtons } from "./AdminApp";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
 const STATUS: Record<RoundStatus, string> = { draft: "מוכן", open: "פתוח", closed: "סגור", resolved: "הוכרע" };
 
@@ -240,7 +241,7 @@ function DrawBar({ game, view, run, left }: { game: Game; view: ClientView; run:
           if (
             await ask({
               title: "🏁 סיבוב הגמר?",
-              body: "הגלגל בוחר אתגר אחרון. כל אחד יכול להמר על כל השקדים שלו, ומי שצודק לוקח כפול. אחרי זה: טקס הפרסים.",
+              body: "הגלגל בוחר אתגר אחרון. כל אחד יכול להמר על כל מה שיש לו, ומי שצודק לוקח כפול. אחרי זה: טקס הפרסים.",
               ok: "🏁 יאללה, גמר",
             })
           )
@@ -250,7 +251,7 @@ function DrawBar({ game, view, run, left }: { game: Game; view: ClientView; run:
         🏁 סיבוב הגמר: הכל או כלום
       </button>
       <button type="button" className="btn btn-ghost btn-s final-btn" disabled={!!queued} onClick={() => run("openContest", {}, "📸 התחרות נפתחה: כולם מעלים תמונה")}>
-        📸 תחרות תמונות מביכות של איתי
+        📸 תחרות תמונות: {WORDS.contestTitle}
       </button>
     </div>
   );
@@ -325,7 +326,7 @@ function CrownDuel({ view, run, game }: { view: ClientView; run: Run; game: stri
         if (
           await ask({
             title: "⚔️ הקרב על הכתר?",
-            body: `${king.name} (המלך) נגד ${last.name} (המקום האחרון) ב${GAMES[game].name}. אם המלך מפסיד, הוא משלם 200 שקדים ל${last.name}. כולם מהמרים כרגיל.`,
+            body: `${king.name} (המלך) נגד ${last.name} (המקום האחרון) ב${GAMES[game].name}. אם המלך מפסיד, הוא משלם 200 ל${last.name}. כולם מהמרים כרגיל.`,
             ok: "⚔️ יאללה",
           })
         )
@@ -438,7 +439,7 @@ function VoteForm({ value, game, onDone }: { value: RoundRec | null; game: Game;
         <span>כמה שניות להצביע</span>
         <input type="number" inputMode="numeric" min={10} max={300} value={seconds} onChange={(e) => setSeconds(Number(e.target.value))} />
       </label>
-      <p className="muted">כל השחקנים הם האפשרויות. מי שמקבל הכי הרבה קולות שותה, ומי שהצביע כמו הרוב מקבל 100 שקדים.</p>
+      <p className="muted">כל השחקנים הם האפשרויות. מי שמקבל הכי הרבה קולות שותה, ומי שהצביע כמו הרוב מקבל 100.</p>
       <button type="button" className="btn btn-gold" disabled={busy || title.trim().length < 4} onClick={save}>
         שמירה
       </button>
@@ -784,7 +785,7 @@ function LiveVote({ game, view, run }: { game: Game; view: ClientView; run: Run 
           type="button"
           className="btn btn-danger"
           onClick={async () => {
-            if (await ask({ title: "לבטל את ההצבעה?", body: "הקולות והשקדים מההצבעה יימחקו והיא תחזור לרשימה.", ok: "ביטול ההצבעה", danger: true }))
+            if (await ask({ title: "לבטל את ההצבעה?", body: "הקולות והתשלומים מההצבעה יימחקו והיא תחזור לרשימה.", ok: "ביטול ההצבעה", danger: true }))
               await run("cancelRound", { roundId: r.id }, "ההצבעה בוטלה");
           }}
         >
@@ -810,7 +811,7 @@ function LiveQuiz({ game, view, run }: { game: Game; view: ClientView; run: Run 
   const pick = async (o: RoundOption) => {
     const ok = await ask({
       title: `״${o.label}״ זאת התשובה?`,
-      body: r.status === "resolved" ? "התוצאה הקודמת תבוטל ותחושב מחדש." : "מי שצדק מקבל שקדים, ומי שטעה עולה למסך עם שוט.",
+      body: r.status === "resolved" ? "התוצאה הקודמת תבוטל ותחושב מחדש." : "מי שצדק מקבל תשלום, ומי שטעה עולה למסך.",
       ok: "כן, לחשוף",
     });
     if (ok) await run("resolveRound", { roundId: r.id, optionId: o.id }, "התשובה נחשפה בטלוויזיה");
@@ -907,7 +908,7 @@ function LiveQuiz({ game, view, run }: { game: Game; view: ClientView; run: Run 
           type="button"
           className="btn btn-danger"
           onClick={async () => {
-            if (await ask({ title: "לבטל את השאלה?", body: "התשובות והשקדים מהשאלה יימחקו והיא תחזור לרשימה.", ok: "ביטול השאלה", danger: true }))
+            if (await ask({ title: "לבטל את השאלה?", body: "התשובות והתשלומים מהשאלה יימחקו והיא תחזור לרשימה.", ok: "ביטול השאלה", danger: true }))
               await run("cancelRound", { roundId: r.id }, "השאלה בוטלה");
           }}
         >
@@ -1013,7 +1014,7 @@ function RoundForm({ value, kind, game, view, onDone }: { value: RoundRec | null
             onChange={(e) => set({ title: e.target.value })}
             rows={2}
             required
-            placeholder={quiz ? "למשל: באיזו עיר איתי ושחף יצאו לדייט הראשון?" : "למשל: איתי יקלע 3 כדורים תוך 30 שניות?"}
+            placeholder={quiz ? WORDS.quizExample : WORDS.roundExample}
           />
         </label>
       </div>
@@ -1073,7 +1074,7 @@ function RoundForm({ value, kind, game, view, onDone }: { value: RoundRec | null
         ))}
         {quiz && (
           <button type="button" className={cls("btn btn-s", correct < 0 ? "btn-gold" : "btn-ghost")} onClick={() => setCorrect(-1)}>
-            {correct < 0 ? "✓ " : ""}אבחר את התשובה בסוף (למשל כשאיתי עונה בלייב)
+            {correct < 0 ? "✓ " : ""}אבחר את התשובה בסוף (למשל כש{WORDS.star} עונה בלייב)
           </button>
         )}
         <div className="opt-tools">
@@ -1108,7 +1109,7 @@ function RoundForm({ value, kind, game, view, onDone }: { value: RoundRec | null
       </fieldset>
 
       <fieldset className="field" disabled={locked}>
-        <legend>{quiz ? "מי לא עונה (למשל איתי, כשהשאלה עליו)" : "מי בתוך האתגר (ולכן לא מהמר)"}</legend>
+        <legend>{quiz ? `מי לא עונה (למשל ${WORDS.star}, כשהשאלה עליו)` : "מי בתוך האתגר (ולכן לא מהמר)"}</legend>
         <div className="player-chips">
           {players.map((p) => (
             <button key={p.id} type="button" className={cls("pchip", d.noBet.includes(p.id) && "on")} onClick={() => toggleNoBet(p.id)}>
@@ -1122,7 +1123,7 @@ function RoundForm({ value, kind, game, view, onDone }: { value: RoundRec | null
         {quiz ? (
           <>
             <label className="field">
-              <span>שקדים לתשובה נכונה</span>
+              <span>תשלום לתשובה נכונה</span>
               <input type="number" inputMode="numeric" value={d.reward} onChange={(e) => set({ reward: Number(e.target.value) })} />
             </label>
             <label className="field">

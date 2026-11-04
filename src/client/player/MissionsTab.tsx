@@ -5,6 +5,7 @@ import { cls, fmt, mmss } from "../lib";
 import { type Game, useServerNow } from "../net";
 import { sfx } from "../sound";
 import { Avatar, Money, Sheet, ask, burst, toast } from "../ui";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
 const tierOf = (reward: number) => (reward >= 200 ? "קשה" : reward >= 150 ? "בינונית" : "קלה");
 
@@ -22,7 +23,7 @@ export function MissionsTab({ game, view }: { game: Game; view: ClientView }) {
         <h2>המשימות הסודיות שלך</h2>
         <p>
           רק אתם רואים אותן. ביצעתם? לוחצים ״ביצעתי״, והטלוויזיה מכריזה שמשימה בוצעה, בלי שם. אם תוך {view.pub.settings.catchWindow} שניות אף אחד לא תופס אתכם, מי
-          שעבדתם עליו משלם לכם. מי שתופס אתכם גונב לכם את השקדים.
+          שעבדתם עליו משלם לכם. מי שתופס אתכם גונב לכם את הקופה.
         </p>
         <div className="missions-progress">
           <span>
@@ -83,7 +84,7 @@ function Envelope({ m, game, view }: { m: Mission; game: Game; view: ClientView 
   const claim = async () => {
     const ok = await ask({
       title: "המשימה בוצעה?",
-      body: `הטלוויזיה תכריז שמשימה סודית בוצעה, בלי שם. לכולם יש ${view.pub.settings.catchWindow} שניות לתפוס אותך. לא תפסו? ${payer} משלם לך ${fmt(m.reward)}. תפסו? התופס גונב לך את השקדים.`,
+      body: `הטלוויזיה תכריז שמשימה סודית בוצעה, בלי שם. לכולם יש ${view.pub.settings.catchWindow} שניות לתפוס אותך. לא תפסו? ${payer} משלם לך ${fmt(m.reward)}. תפסו? התופס גונב לך את הקופה.${view.pub.settings.confirmByTarget ? " ובסוף מי שעבדת עליו מאשר שזה באמת קרה." : ""}`,
       ok: "ביצעתי!",
     });
     if (!ok) return;
@@ -105,7 +106,7 @@ function Envelope({ m, game, view }: { m: Mission; game: Game; view: ClientView 
   const swap = async () => {
     const ok = await ask({
       title: "🔄 להחליף את המשימה?",
-      body: "מקבלים משימה אחרת מהמאגר, בדרך כלל באותו שווי. ההחלפה עולה 50 שקדים, ואף אחד לא יודע שהחלפת.",
+      body: "מקבלים משימה אחרת מהמאגר, בדרך כלל באותו שווי. ההחלפה עולה 50, ואף אחד לא יודע שהחלפת.",
       ok: "להחליף ב־50",
     });
     if (!ok) return;
@@ -122,7 +123,7 @@ function Envelope({ m, game, view }: { m: Mission; game: Game; view: ClientView 
   };
 
   const unclaim = async () => {
-    const ok = await ask({ title: "לבטל את הסימון?", body: "השקדים חוזרים למי ששילם, והמשימה חוזרת להיות פתוחה.", ok: "ביטול הסימון" });
+    const ok = await ask({ title: "לבטל את הסימון?", body: "הכסף חוזר למי ששילם, והמשימה חוזרת להיות פתוחה.", ok: "ביטול הסימון" });
     if (!ok) return;
     setBusy(true);
     try {
@@ -195,7 +196,7 @@ function Envelope({ m, game, view }: { m: Mission; game: Game; view: ClientView 
                     ✅ ביצעתי!
                   </button>
                   <button type="button" className="link-btn" onClick={swap} disabled={busy || view.me!.available < 150}>
-                    🔄 בלתי אפשרית? להחליף ב־50 שקדים
+                    🔄 בלתי אפשרית? להחליף ב־50
                   </button>
                 </>
               )}
@@ -287,7 +288,7 @@ function CatchCard({ game, view }: { game: Game; view: ClientView }) {
         <>
           {acc && (
             <p className="catch-status">
-              {acc.status === "right" ? `✅ צדקת לגבי ${nameOf(acc.suspect)}! גנבת לו את השקדים` : `❌ טעית לגבי ${nameOf(acc.suspect)}. ${falsePenalty} עברו אליו`}
+              {acc.status === "right" ? `✅ צדקת לגבי ${nameOf(acc.suspect)}! גנבת לו את הקופה` : `❌ טעית לגבי ${nameOf(acc.suspect)}. ${falsePenalty} עברו אליו`}
             </p>
           )}
           <button type="button" className="btn btn-ghost" onClick={() => setSheet(true)}>
@@ -309,7 +310,7 @@ function CatchCard({ game, view }: { game: Game; view: ClientView }) {
           </div>
           <label className="field">
             <span>מה לדעתכם המשימה שלו?</span>
-            <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} maxLength={160} placeholder="למשל: הוא ניסה לגרום לאיתי להגיד ״פיסטוק״" />
+            <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} maxLength={160} placeholder={WORDS.accuseExample} />
           </label>
           <div className="sheet-actions">
             <button type="button" className="btn btn-gold" disabled={!suspect || text.trim().length < 3 || busy} onClick={send}>

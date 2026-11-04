@@ -7,6 +7,7 @@ import { type Game, useServerNow } from "../net";
 import { sfx } from "../sound";
 import { RodeoItay } from "../rodeo";
 import { Avatar, Change, Coin, Money, Spark, ask, burst, toast } from "../ui";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
 export function BetTab({ game, view, me }: { game: Game; view: ClientView; me: PlayerPub }) {
   const round = view.pub.round;
@@ -288,7 +289,7 @@ function BetForm({ game, view, me, round, now, compact }: { game: Game; view: Cl
             </p>
           </div>
 
-          {round.final && <p className="final-line">🏁 הכל או כלום: אפשר לשים את כל השקדים, ומי שצודק לוקח כפול.</p>}
+          {round.final && <p className="final-line">🏁 הכל או כלום: אפשר לשים הכל, ומי שצודק לוקח כפול.</p>}
           {round.mult > 1 && <p className="final-line">💥 הסיבוב הזה כפול: מי שצודק מרוויח כפול.</p>}
           <p className="payout-line">
             🤫 אף אחד לא רואה על מה הימרתם עד שהזמן נגמר. מי שצודק מתחלק בכל הקופה, לפי הסכום שהימר.
@@ -527,7 +528,7 @@ function VoteCard({ game, view, me, round, now, open }: { game: Game; view: Clie
         {open
           ? mine
             ? "הקול שלך נקלט 🤫 אפשר לשנות עד שהזמן נגמר."
-            : `מי שמקבל הכי הרבה קולות שותה. הצבעת כמו הרוב? ${fmt(round.reward * (round.mult || 1))} שקדים.`
+            : `מי שמקבל הכי הרבה קולות שותה. הצבעת כמו הרוב? ${fmt(round.reward * (round.mult || 1))} ${view.pub.settings.currency}.`
           : !resolved
             ? "סופרים קולות…"
             : round.refunded
@@ -599,7 +600,7 @@ function PhotoCard({ game, view, me, round: r, now }: { game: Game; view: Client
       {(collecting || voting) && r.closesAt && <Countdown round={r} now={now} />}
       {collecting && (
         <>
-          <p className="qcard-note">{mine ? "התמונה שלך בפנים ✓ אפשר להחליף עד שמתחילים להצביע." : "בוחרים מהגלריה את התמונה הכי מביכה של איתי מהערב, או מצלמים עכשיו."}</p>
+          <p className="qcard-note">{mine ? "התמונה שלך בפנים ✓ אפשר להחליף עד שמתחילים להצביע." : `בוחרים מהגלריה: ${WORDS.contestTitle}. או מצלמים עכשיו.`}</p>
           {mine?.photo && <img className="photo-mine" src={mine.photo} alt="התמונה ששלחת" />}
           <label className={cls("btn btn-gold btn-xl", busy && "busy")}>
             {busy ? "מעלה…" : mine ? "📸 להחליף תמונה" : "📸 לבחור תמונה"}
@@ -733,7 +734,7 @@ function GroomCards({ game, view, me, open }: { game: Game; view: ClientView; me
 
   return (
     <div className="gold-cards felt">
-      <h2>🃏 קלפי הזהב של החתן</h2>
+      <h2>🃏 קלפי הזהב של {WORDS.star}</h2>
       <p className="muted">רק לך יש אותם. כל קלף עובד פעם אחת בלילה.</p>
       <div className="gc-row">
         {keys.map((k) => (

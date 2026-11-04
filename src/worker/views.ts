@@ -134,6 +134,8 @@ export function buildPublic(s: GameState, now: number, online: Set<ID>): PublicV
       spark: arr.slice(-24),
       last: last.get(p.id) ?? 0,
       hat: p.hat,
+      circle: p.circle,
+      spectator: p.spectator,
       item: p.item,
     };
   });
@@ -188,6 +190,9 @@ function buildMe(s: GameState, pid: ID): MeView {
     accusation: latest(s.accusations.filter((a) => a.by === pid)),
     bailout: latest(s.bailouts.filter((b) => b.playerId === pid)),
     nightStaked: nightStaked(s, pid),
+    toConfirm: s.missions
+      .filter((m) => m.status === "confirm" && m.assignedTo && m.assignedTo !== pid && Object.values(m.targets).includes(pid))
+      .map((m) => ({ missionId: m.id, by: m.assignedTo!, text: m.text, until: m.confirmBy ?? 0 })),
   };
 }
 

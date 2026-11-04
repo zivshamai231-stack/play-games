@@ -4,6 +4,7 @@ import { cls, fmt } from "../lib";
 import { creds, type Game } from "../net";
 import { sfx } from "../sound";
 import { Avatar, Marquee, toast } from "../ui";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
 export function JoinScreen({ game, view }: { game: Game; view: ClientView }) {
   const [busy, setBusy] = useState<string | null>(null);
@@ -29,7 +30,7 @@ export function JoinScreen({ game, view }: { game: Game; view: ClientView }) {
     <div className="join">
       <Marquee size="m" />
       <p className="join-lede">
-        מסיבת הרווקים של איתי. כל אחד מקבל {fmt(startBalance)} {currency}, מהמר על מה שקורה הלילה ומבצע משימות סודיות. מי שמסיים הכי עשיר, מנצח.
+        {WORDS.joinText.replace("{start}", `${fmt(startBalance)} ${currency}`)}
       </p>
       <h1 className="join-title">בחרו את השם שלכם</h1>
       <div className="join-grid">
@@ -50,7 +51,7 @@ export function JoinScreen({ game, view }: { game: Game; view: ClientView }) {
             </span>
             <Avatar p={p} size={72} />
             <span className="join-name">{p.name}</span>
-            <span className="join-sub">{busy === p.id ? "מתחבר…" : p.claimed ? "כבר בפנים" : p.isGroom ? "החתן 👑" : "פנוי"}</span>
+            <span className="join-sub">{busy === p.id ? "מתחבר…" : p.claimed ? "כבר בפנים" : p.isGroom ? `${WORDS.star} 👑` : "פנוי"}</span>
             <span className="card-corner bottom" aria-hidden="true">
               {p.ticker}
             </span>

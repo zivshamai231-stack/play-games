@@ -11,5 +11,5 @@
     "isolatedModules": true,
     "types": ["vite/client"]
   },
-  "include": ["src/client", "src/shared"]
+  "include": ["src/client", "src/shared", "src/content"]
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { MyBet, PlayerPub, RoundPub } from "../shared/types";
+import { WORDS, MEDIA } from "../shared/catalog";
 
 export const fmt = (n: number) => Math.round(n).toLocaleString("en-US");
 export const signed = (n: number) => (n > 0 ? "+" : n < 0 ? "−" : "") + fmt(Math.abs(n));
@@ -121,7 +122,7 @@ export function kingAndLast(players: PlayerPub[]) {
 export const LETTERS = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י"];
 
 /** Template placeholders shown the way a host reads them. */
-export const showTemplate = (t: string, groom = "החתן") => t.replaceAll("{X}", "‹חבר›").replaceAll("{Y}", "‹חבר נוסף›").replaceAll("{G}", groom);
+export const showTemplate = (t: string, groom = WORDS.star) => t.replaceAll("{X}", "‹חבר›").replaceAll("{Y}", "‹חבר נוסף›").replaceAll("{G}", groom);
 
 export function useMedia(query: string) {
   const [match, setMatch] = useState(() => typeof matchMedia !== "undefined" && matchMedia(query).matches);

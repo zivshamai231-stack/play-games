@@ -9,6 +9,7 @@ import { QR } from "../qr";
 import { hush, prefetchLine, sfx, speak } from "../sound";
 import { Avatar, Change, Coin, FunnyFace, Led, Marquee, Money, Podium, Spark, burst } from "../ui";
 import { Spotlight, holdTv, loseKind, tvBusy } from "./Moments";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
 /** Run a sequence of [phase, ms] steps; each entry fires its callback. Returns a cleanup. */
 function runSteps<P>(steps: [P, number][], enter: (p: P) => void, done: () => void) {
@@ -47,13 +48,7 @@ function useGallery(groom: PlayerPub | undefined) {
   return all.length ? all[i % all.length] : null;
 }
 
-const NUDGES = [
-  "🎁 תקנו משהו לחבר שלכם, יא קמצנים!",
-  "📣 כתבו משהו למסך מהטלפון. גם בעילום שם 🕵️",
-  "🤫 מישהו פה כבר עובד עליכם עם משימה סודית",
-  "💩 קקי על הראש עולה רק 10 שקדים. רק אומר",
-  "🌿 ג׳וינט לחבר? 20 שקדים. אין לכם תירוצים",
-];
+const NUDGES = WORDS.nudges;
 
 export function Lobby({ view }: { view: ClientView }) {
   const players = view.pub.players;
@@ -76,11 +71,11 @@ export function Lobby({ view }: { view: ClientView }) {
           <div className="cert-photo">
             {photo && <motion.img key={photo} src={photo} alt="" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.2 }} />}
           </div>
-          <div className="cert-name">{groom ? `${groom.name} שקד בע״מ` : "החתן בע״מ"}</div>
+          <div className="cert-name">{WORDS.certCompany.replace("{n}", groom?.name ?? WORDS.star)}</div>
           <dl className="cert-rows">
             <div>
               <dt>סימול</dt>
-              <dd dir="ltr">{groom?.ticker ?? "SHKD"}</dd>
+              <dd dir="ltr">{groom?.ticker ?? "STAR"}</dd>
             </div>
             <div>
               <dt>מחיר פתיחה</dt>
@@ -89,17 +84,17 @@ export function Lobby({ view }: { view: ClientView }) {
               </dd>
             </div>
             <div>
-              <dt>מיזוג צפוי עם שחף</dt>
-              <dd dir="ltr">17.11.2026</dd>
+              <dt>{WORDS.certRow[0]}</dt>
+              <dd dir="ltr">{WORDS.certRow[1]}</dd>
             </div>
           </dl>
         </div>
       </div>
       <div className="lobby-side">
         <Marquee size="l" lights />
-        <h1 className="lobby-h">הבורסה של החתן נפתחה</h1>
+        <h1 className="lobby-h">{WORDS.lobbyTitle}</h1>
         <p className="lobby-p">
-          סורקים, בוחרים שם ומקבלים {fmt(startBalance)} {currency} ושלוש משימות סודיות. מהמרים על מה שקורה הלילה. מי שמסיים הכי עשיר, מנצח.
+          {WORDS.lobbyText.replace("{start}", `${fmt(startBalance)} ${currency}`)}
         </p>
         {allIn ? (
           <>
@@ -259,7 +254,7 @@ export function RoundScreen({ view, game }: { view: ClientView; game: Game }) {
       </h1>
       {(r.note || r.final) && (
         <p className="tvround-note">
-          {r.final && <span className="tv-final-line">🏁 הכל או כלום: מהמרים על כל השקדים, והזוכים לוקחים כפול</span>}
+          {r.final && <span className="tv-final-line">🏁 הכל או כלום: מהמרים על הכל, והזוכים לוקחים כפול</span>}
           {r.note}
         </p>
       )}
@@ -1036,7 +1031,7 @@ export function BoardScreen({ view }: { view: ClientView }) {
             )}
             {lastP && (
               <p>
-                🍋 <b>{lastP.name}</b> הוא השקד המר: הגלגל אוהב אותו
+                🍋 <b>{lastP.name}</b> הוא {WORDS.last}: הגלגל אוהב אותו
               </p>
             )}
           </div>
@@ -1205,7 +1200,7 @@ function AwardView({ step, people, view }: { step: AwardStep; people: Record<str
     return (
       <div className="award-title">
         <Marquee size="l" lights />
-        <h1>🏆 טקס פרסי השקד הזהב</h1>
+        <h1>🏆 {WORDS.awardsTitle}</h1>
         <p>הרגע שכולם חיכו לו. מי עבד על מי, מי הימר נכון, ומי שותה.</p>
       </div>
     );
@@ -1249,7 +1244,7 @@ function AwardView({ step, people, view }: { step: AwardStep; people: Record<str
       <span className="award-emoji" aria-hidden="true">
         🍋
       </span>
-      <h1>השקד המר של הלילה</h1>
+      <h1>{WORDS.last} של הלילה</h1>
       {loser && (
         <span className="award-person">
           <FunnyFace p={loser} size={240} />
@@ -1275,7 +1270,7 @@ export function WinnerScreen({ view, embedded }: { view: ClientView; embedded?: 
     <div className={cls("tvwin", embedded && "embedded")}>
       <Marquee size="m" lights />
       <motion.h1 className="tvwin-title" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-        מלך השקדים של הלילה
+        {WORDS.king} של הלילה
       </motion.h1>
       <motion.div className="tvwin-podium" initial={{ opacity: 0, y: 80 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8, type: "spring", stiffness: 110, damping: 15 }}>
         <Podium list={list.slice(0, 3)} size="l" king value={(p) => <Led value={p.balance} />} />

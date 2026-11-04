@@ -3,9 +3,10 @@ import type { Audience, ClientView, Mission, PlayerPub } from "../../shared/type
 import { cls, showTemplate } from "../lib";
 import { Avatar, Money, Sheet, ask } from "../ui";
 import type { Run } from "./AdminApp";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
-const AUD: Record<Audience, string> = { all: "לכולם", friends: "לחברים (לא לחתן)", groom: "רק לחתן" };
-const STATUS_ICON: Record<Mission["status"], string> = { open: "✉️", pending: "⏳", done: "✅", burned: "🔥" };
+const AUD: Record<Audience, string> = { all: "לכולם", friends: `לחברים (לא ל${WORDS.star.replace(/^ה/, "")})`, groom: `רק ל${WORDS.star.replace(/^ה/, "")}` };
+const STATUS_ICON: Record<Mission["status"], string> = { open: "✉️", pending: "⏳", confirm: "🙋", done: "✅", burned: "🔥" };
 
 const ago = (t: number | null) => {
   if (!t) return "";
@@ -31,7 +32,7 @@ export function MissionsTab({ view, run }: { view: ClientView; run: Run }) {
   return (
     <section className="stack">
       <p className="muted">
-        כל מי שנכנס מקבל 3 משימות אוטומטית. מי שמסמן ״ביצעתי״ מקבל את השקדים מיד. כאן אפשר לבטל סימון שנראה לכם חשוד, להחליף משימות ולכתוב חדשות.
+        כל מי שנכנס מקבל 3 משימות אוטומטית. מי שמסמן ״ביצעתי״ מקבל את התשלום מיד. כאן אפשר לבטל סימון שנראה לכם חשוד, להחליף משימות ולכתוב חדשות.
       </p>
 
       <div className="missions-top">
@@ -216,12 +217,12 @@ export function MissionsTab({ view, run }: { view: ClientView; run: Run }) {
 function MissionForm({ value, players, run, onDone }: { value: Mission | null; players: PlayerPub[]; run: Run; onDone: () => void }) {
   const [text, setText] = useState(value?.template ?? "");
   const ref = useRef<HTMLTextAreaElement>(null);
-  const groom = players.find((p) => p.isGroom)?.name ?? "החתן";
+  const groom = players.find((p) => p.isGroom)?.name ?? WORDS.star;
   const friends = players.filter((p) => !p.isGroom);
   const example = text
     .replaceAll("{G}", groom)
-    .replaceAll("{X}", friends[1]?.name ?? "דרורי")
-    .replaceAll("{Y}", friends[2]?.name ?? "סיסו");
+    .replaceAll("{X}", friends[1]?.name ?? "חבר")
+    .replaceAll("{Y}", friends[2]?.name ?? "חבר נוסף");
   // after inserting a name slot, the caret lands right after it
   const caret = useRef<number | null>(null);
   useLayoutEffect(() => {

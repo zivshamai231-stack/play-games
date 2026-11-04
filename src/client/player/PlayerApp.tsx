@@ -12,6 +12,7 @@ import { MissionsTab } from "./MissionsTab";
 import { RodeoPhoto, useIntro } from "../rodeo";
 import { FeedWatcher, MissionWatcher, ResultOverlay } from "./Overlays";
 import { NowBar, RoundPop, type Tab, useGo } from "./Now";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
 export function PlayerApp() {
   const { game, view, status } = useGame("player");
@@ -160,7 +161,7 @@ function HowTo({ view, me, open, onClose }: { view: ClientView; me: PlayerPub; o
           <b>🤫 משימות סודיות:</b> יש לך 3. ביצעת? ״ביצעתי״, והטלוויזיה מכריזה בלי שם. לא תפסו אותך תוך {catchWindow} שניות? מי שעבדת עליו משלם לך. משימה בלתי אפשרית? מחליפים ב־50.
         </li>
         <li>
-          <b>🕵️ תפסתי!</b> ראיתם מישהו עושה משימה? בלשונית משימות: ״תפסתי מישהו״. צדקתם? גונבים לו את השקדים.
+          <b>🕵️ תפסתי!</b> ראיתם מישהו עושה משימה? בלשונית משימות: ״תפסתי מישהו״. צדקתם? גונבים לו את ה{view.pub.settings.currency}.
         </li>
         <li>
           <b>🌙 הימורי לילה:</b> פתוחים כל הלילה, למטה בבורסה. עד {fmt(nightCap)} ביחד, כדי שיישאר לאתגרים.
@@ -170,7 +171,7 @@ function HowTo({ view, me, open, onClose }: { view: ClientView; me: PlayerPub; o
         </li>
         {me.isGroom && (
           <li>
-            <b>🃏 רק לך, החתן:</b> 3 קלפי זהב בבורסה: וטו, הכפלה ו״אתה שותה!״. כל אחד עובד פעם אחת בלילה.
+            <b>🃏 רק לך, {WORDS.star}:</b> 3 קלפי זהב בבורסה: וטו, הכפלה ו״אתה שותה!״. כל אחד עובד פעם אחת בלילה.
           </li>
         )}
         <li>
@@ -214,7 +215,7 @@ function TopBar({ me, view, game, isKing, onHelp }: { me: PlayerPub; view: Clien
         <span className="me-name">{me.name}</span>
       </button>
       <div className="meter" aria-label={`יתרה: ${me.balance} ${view.pub.settings.currency}`}>
-        <span className="meter-label">השקדים שלי</span>
+        <span className="meter-label">ה{view.pub.settings.currency} שלי</span>
         <Led value={me.balance} />
         <Coin size={20} />
       </div>

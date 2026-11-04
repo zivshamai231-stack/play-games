@@ -4,6 +4,7 @@ import { cls, fmt, resizeImage } from "../lib";
 import type { Game } from "../net";
 import { Avatar, Money, Sheet, ask, toast } from "../ui";
 import type { Run } from "./AdminApp";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
 export function PlayersTab({ game, view, run }: { game: Game; view: ClientView; run: Run }) {
   const players = view.pub.players;
@@ -143,7 +144,7 @@ function PlayerForm({ value, game, run, onDone }: { value: PlayerPub | null; gam
       </label>
       <label className="check">
         <input type="checkbox" checked={isGroom} onChange={(e) => setIsGroom(e.target.checked)} />
-        <span>זה החתן 👑</span>
+        <span>זה {WORDS.star} 👑</span>
       </label>
       <div className="sheet-actions">
         <button type="submit" className="btn btn-gold" disabled={busy}>

@@ -4,6 +4,7 @@ import type { DrawState, FeedEvent, PlayerPub } from "../../shared/types";
 import { cls, photoOf } from "../lib";
 import { prefetchLine, sfx, speak } from "../sound";
 import { Money, burst } from "../ui";
+import { MEDIA, STAR_FACE } from "../../shared/catalog";
 
 /* The TV's big moments: AI pictures of the guys, full screen, with a line the announcer reads out. */
 
@@ -255,7 +256,7 @@ export function BigWheel({ draw, players, feed }: { draw: DrawState; players: Pl
             return <circle key={i} className={cls("bw-bulb", i % 2 === 1 && "odd")} cx={Math.sin((a * Math.PI) / 180) * 105} cy={-Math.cos((a * Math.PI) / 180) * 105} r="2.6" />;
           })}
           <circle r="27" fill="#E9B949" stroke="#4A2A12" strokeWidth="2" />
-          <image href="/photos/itay-face.jpg" x="-24" y="-24" width="48" height="48" clipPath="url(#bw-hub)" preserveAspectRatio="xMidYMid slice" />
+          {HUB && <image href={HUB} x="-24" y="-24" width="48" height="48" clipPath="url(#bw-hub)" preserveAspectRatio="xMidYMid slice" />}
         </svg>
         <div className="bw-pointer" aria-hidden="true" />
       </div>
@@ -278,7 +279,8 @@ export function BigWheel({ draw, players, feed }: { draw: DrawState; players: Pl
 
 /* ---------- while bets are open: music, and Itay popping up from the edges ---------- */
 
-const POPS = ["baby", "ballerina", "sumo", "mafia", "mermaid", "chain", "cat", "grill", "titanic"].map((n) => `/photos/ai/itay/${n}.jpg`);
+const POPS = MEDIA.starGallery.map(([src]) => src);
+const HUB = MEDIA.wheelHub ?? STAR_FACE;
 const SLOTS = [
   { x: -46, y: 150, r: -11 },
   { x: 1666, y: 130, r: 10 },

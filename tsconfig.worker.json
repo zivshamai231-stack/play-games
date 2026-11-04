@@ -10,5 +10,5 @@
     "isolatedModules": true,
     "types": ["./worker-configuration.d.ts"]
   },
-  "include": ["src/worker", "src/shared", "worker-configuration.d.ts"]
+  "include": ["src/worker", "src/shared", "src/content", "worker-configuration.d.ts"]
 }

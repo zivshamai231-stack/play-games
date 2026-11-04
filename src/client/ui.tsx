@@ -6,6 +6,7 @@ import type { PlayerPub } from "../shared/types";
 import { cls, fmt, pct, photoOf, ranked, reducedMotion, signed } from "./lib";
 import type { ConnStatus } from "./net";
 import { setMuted, sfx, useMuted } from "./sound";
+import { WORDS, MEDIA } from "../shared/catalog";
 
 /* ---------- shared SVG paint (defined once so gradients never collide) ---------- */
 
@@ -210,10 +211,10 @@ export function Spark({ data, w = 120, h = 34 }: { data: number[]; w?: number; h
 /** Vegas marquee sign. `lights` animates the bulbs (TV attract mode only). */
 export function Marquee({ size = "m", lights = false }: { size?: "s" | "m" | "l"; lights?: boolean }) {
   return (
-    <div className={cls("marquee", `marquee-${size}`, lights && "lights")} role="img" aria-label="Shaked Goes Nuts">
+    <div className={cls("marquee", `marquee-${size}`, lights && "lights")} role="img" aria-label={WORDS.brand.join(" ")}>
       <span className="marquee-text" aria-hidden="true">
-        <span className="m1">SHAKED</span>
-        <span className="m2">GOES NUTS</span>
+        <span className="m1">{WORDS.brand[0]}</span>
+        <span className="m2">{WORDS.brand[1]}</span>
       </span>
     </div>
   );

@@ -10,6 +10,7 @@ import { CatchClock, ChatLog, FxLayer, MusicDirector, MysterySpot, ShoutsLayer, 
 import { IdleShow } from "./Idle";
 import { BettingVibes, BigWheel, Spinner, Spotlight, holdTv, spinLength, tvBusy } from "./Moments";
 import { AwardsScreen, BoardScreen, Lobby, NightScreen, PhotoScreen, QuizScreen, RevealScreen, RoundScreen, RulesScreen, VoteScreen, WinnerScreen } from "./Screens";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
 // the host screen embeds a silent copy of the TV as a preview
 const PREVIEW = new URLSearchParams(location.search).has("preview");
@@ -245,10 +246,10 @@ function spotFor(e: FeedEvent, people: PlayerPub[]): Parameters<typeof Spotlight
       return { kind: "fast", title: `🔥 ${e.data?.streak ?? 3} ברצף!`, people: one, line, amount: e.data?.amount };
     case "card":
       if (e.data?.card === "drink") return { kind: "shot", title: "🃏 קלף זהב: אתה שותה!", people: one, line, task: "לשתות שוט 🥃" };
-      if (e.data?.card === "veto") return { kind: "mission", title: "🛑 וטו של החתן!", people: one, line };
-      return { kind: "win", title: "💥 החתן הכפיל!", people: one, line };
+      if (e.data?.card === "veto") return { kind: "mission", title: `🛑 וטו של ${WORDS.star}!`, people: one, line };
+      return { kind: "win", title: `💥 ${WORDS.star} הכפיל!`, people: one, line };
     default:
-      return { kind: "mission", title: "🕵️ נחשף!", people: one, line, sub: "אף אחד לא תפס אותו. עדיין אפשר לנחש מה הוא עשה ולגנוב לו את השקדים 🕵️", amount: e.data?.amount };
+      return { kind: "mission", title: "🕵️ נחשף!", people: one, line, sub: "אף אחד לא תפס אותו. עדיין אפשר לנחש מה הוא עשה ולגנוב לו את הקופה 🕵️", amount: e.data?.amount };
   }
 }
 

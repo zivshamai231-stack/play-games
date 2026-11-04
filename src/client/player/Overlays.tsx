@@ -4,6 +4,7 @@ import type { ClientView, RoundPub } from "../../shared/types";
 import { cls, lsGet, lsSet } from "../lib";
 import { sfx } from "../sound";
 import { Money, burst, toast } from "../ui";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
 interface Flash {
   kind: "win" | "lose" | "mission" | "drink" | "caught";
@@ -164,7 +165,7 @@ export function FeedWatcher({ view, meId }: { view: ClientView; meId: string }) 
         if (!mine.has(e.ref ?? "")) toast(e.text, "info", 4500);
       } else if (e.kind === "reveal") {
         if (e.players[0] === meId) {
-          setFlash({ kind: "win", amount: e.data?.amount, title: "🕵️ לא תפסו אותך!", sub: "עבדת עליהם בעיניים. השקדים שלך." });
+          setFlash({ kind: "win", amount: e.data?.amount, title: "🕵️ לא תפסו אותך!", sub: "עבדת עליהם בעיניים. הכסף שלך." });
           sfx.win();
           burst("coins");
         } else if (e.players.slice(1).includes(meId)) {
@@ -197,7 +198,7 @@ export function FeedWatcher({ view, meId }: { view: ClientView; meId: string }) 
         sfx.ding();
         navigator.vibrate?.([120, 60, 120, 60, 300]);
       } else if (e.kind === "caught" && e.players[0] === meId) {
-        setFlash({ kind: "win", amount: e.data?.amount ?? view.pub.settings.catchReward, title: "🕵️ צדקת!", sub: "תפסת אותו על חם וגנבת לו את השקדים." });
+        setFlash({ kind: "win", amount: e.data?.amount ?? view.pub.settings.catchReward, title: "🕵️ צדקת!", sub: "תפסת אותו על חם וגנבת לו את הקופה." });
         sfx.win();
       } else if (e.kind === "caught" && e.players[1] === meId) {
         // the burned-mission flash covers this
@@ -215,7 +216,7 @@ export function FeedWatcher({ view, meId }: { view: ClientView; meId: string }) 
           burst("coins");
         }, 6000);
       } else if (e.kind === "card" && e.data?.card === "drink" && e.players.includes(meId)) {
-        setFlash({ kind: "drink", title: "🃏 החתן החליט: אתה שותה!", sub: e.data?.line ?? e.text });
+        setFlash({ kind: "drink", title: `🃏 ${WORDS.star} החליט: אתה שותה!`, sub: e.data?.line ?? e.text });
         sfx.gotcha();
         navigator.vibrate?.([120, 60, 120, 60, 300]);
       } else {

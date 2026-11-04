@@ -5,6 +5,7 @@ import { cls, resizeImage } from "../lib";
 import type { Game } from "../net";
 import { sfx } from "../sound";
 import { Avatar, Money, ask, burst, toast } from "../ui";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
 /** Everything you can throw at the big screen, and the gift shop. */
 export function FunTab({ game, view, me }: { game: Game; view: ClientView; me: PlayerPub }) {
@@ -105,7 +106,7 @@ function ToTheScreen({ game, view }: { game: Game; view: ClientView }) {
       </div>
       <label className="field">
         <span>הודעה למסך</span>
-        <textarea rows={2} maxLength={90} value={text} onChange={(e) => setText(e.target.value)} placeholder="למשל: איתי, עוד לא מאוחר לברוח 🏃" />
+        <textarea rows={2} maxLength={90} value={text} onChange={(e) => setText(e.target.value)} placeholder={WORDS.shoutExample} />
       </label>
       <label className="check">
         <input type="checkbox" checked={anon} onChange={(e) => setAnon(e.target.checked)} />
@@ -156,7 +157,7 @@ function GiftShop({ game, view, me }: { game: Game; view: ClientView; me: Player
     const forMe = target.id === me.id;
     const ok = await ask({
       title: `${it.emoji} ${it.name} ${forMe ? "לעצמך" : `ל${target.name}`}?`,
-      body: `עולה ${it.price} שקדים. ${it.slot === "hat" ? "זה יופיע על הראש" : "זה יופיע ליד הפרצוף"} בתמונה ${forMe ? "שלך" : "שלו"} בכל המסכים, עד שמישהו יקנה משהו אחר.`,
+      body: `עולה ${it.price}. ${it.slot === "hat" ? "זה יופיע על הראש" : "זה יופיע ליד הפרצוף"} בתמונה ${forMe ? "שלך" : "שלו"} בכל המסכים, עד שמישהו יקנה משהו אחר.`,
       ok: `לקנות ב־${it.price}`,
     });
     if (!ok) return;

@@ -11,6 +11,7 @@ import { MissionsTab } from "./Missions";
 import { PlayersTab } from "./Players";
 import { RoundsTab } from "./Rounds";
 import { RodeoPhoto } from "../rodeo";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
 // /admin#key=123456 logs the host in once and keeps the code on this device
 {
@@ -317,13 +318,13 @@ export function WheelButtons({ run }: { run: Run }) {
 function TvTab({ view, run, wide }: { view: ClientView; run: Run; wide: boolean }) {
   const [peek, setPeek] = useState(false);
   const modes: [TvMode, string, string][] = [
-    ["lobby", "🎰 מסך פתיחה", "הלוגו, תעודת המניה של איתי וקוד QR להצטרפות"],
+    ["lobby", "🎰 מסך פתיחה", "הלוגו, תעודת המניה וקוד QR להצטרפות"],
     ["rules", "📖 איך משחקים", `${RULES.length} שקפים עם הקריין, לתחילת הערב. מעבירים מכאן`],
     ["round", "🎲 הסיבוב הנוכחי", "האתגר או שאלת הידע: השאלה, הקופה והתוצאה"],
-    ["board", "📈 הבורסה", "פודיום, מי המלך ומי השקד המר, וגרף לכל אחד"],
+    ["board", "📈 הבורסה", `פודיום, מי המלך ומי ${WORDS.last}, וגרף לכל אחד`],
     ["night", "🌙 הימורי הלילה", "כל הקופות והיחסים של הימורי הלילה"],
     ["missions", "🤫 חשיפת המשימות", "מציג את המשימות של כולם. לסוף הערב בלבד"],
-    ["awards", "🏆 טקס פרסים", "פרסים מצחיקים, שלושה פודיומים, והשקד המר"],
+    ["awards", "🏆 טקס פרסים", `פרסים מצחיקים, שלושה פודיומים, ו${WORDS.last}`],
     ["winner", "👑 הכרזת המנצח", "רק הפודיום הסופי, עם קונפטי"],
   ];
   const origin = location.origin;
@@ -351,7 +352,7 @@ function TvTab({ view, run, wide }: { view: ClientView; run: Run; wide: boolean 
   const stepName = (i: number) => {
     const s = steps[i];
     if (!s) return "";
-    return s.kind === "title" ? "פתיחה" : s.kind === "final" ? "👑 הפודיום הסופי" : s.kind === "punish" ? "🍋 השקד המר" : `${s.emoji} ${s.title}`;
+    return s.kind === "title" ? "פתיחה" : s.kind === "final" ? "👑 הפודיום הסופי" : s.kind === "punish" ? `🍋 ${WORDS.last}` : `${s.emoji} ${s.title}`;
   };
 
   return (

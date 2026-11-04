@@ -4,6 +4,7 @@ import type { ClientView, PlayerPub } from "../../shared/types";
 import { cls, mmss } from "../lib";
 import { type Game, useServerNow } from "../net";
 import { sfx } from "../sound";
+import { WORDS, MEDIA } from "../../shared/catalog";
 
 export type Tab = "bet" | "missions" | "board" | "fun";
 
@@ -26,7 +27,7 @@ function hintFor(view: ClientView, me: PlayerPub, now: number): Hint {
     if (r.kind === "photo" && r.phase === "collect")
       return r.options.some((o) => o.playerId === me.id)
         ? { icon: "✅", text: `התמונה שלך בפנים. מחכים להצבעה${t}`, tone: "calm", tab: "bet" }
-        : { icon: "📸", text: `עכשיו: לשלוח תמונה מביכה של איתי!${t}`, tone: "go", tab: "bet" };
+        : { icon: "📸", text: `עכשיו: ${WORDS.contestNow}${t}`, tone: "go", tab: "bet" };
     if (r.noBet.includes(me.id)) return { icon: "💪", text: r.kind === "quiz" ? "על השאלה הזאת עונים בקול מול כולם" : "אתה בתוך האתגר. בהצלחה!", tone: "calm", tab: "bet" };
     if (!mine.bets[r.id]) {
       if (r.kind === "quiz") return { icon: "❓", text: `עכשיו: לענות מהר!${t}`, tone: "go", tab: "bet" };
